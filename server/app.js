@@ -255,13 +255,11 @@ app.post("/api/sso", (req, res) => {
   );
 });
 
-if (__dirname.includes("dev")) {
-  serv.listen(2000);
-  console.log("listening on dev");
-} else {
-  serv.listen(2020);
-  console.log("listening on prod");
-}
+const PORT = process.env.PORT || 8080;
+
+serv.listen(PORT, '0.0.0.0', () => {
+  console.log(`listening on ${PORT}`);
+});
 
 let counter = 0;
 _.each(spawnPoints, function (sp) {
