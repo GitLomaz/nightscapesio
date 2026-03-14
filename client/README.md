@@ -11,3 +11,5 @@ The cert and key are reused from the server. Replace them with whereever you hav
 # extend tileset after changes..
 
 tile-extruder --tileWidth 32 --tileHeight 32 --input ./castle.png --output ./castle_ex.png
+
+# Extending
