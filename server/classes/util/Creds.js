@@ -1,11 +1,11 @@
-const NIGHTSCAPE_DB_HOST = "kal-db.cjc0tsqhx78v.us-west-2.rds.amazonaws.com";
-const NIGHTSCAPE_DB_USER = "root";
-const NIGHTSCAPE_DB_PASSWORD = "!1bebuMuJu";
-const NIGHTSCAPE_DB_DATABASE = "nightscape";
+const DB_HOST = process.env.DB_HOST;
+const DB_USER = process.env.DB_USER;
+const DB_PASS = process.env.DB_PASS;
+const DB_NAME = "nightscape";
 
 module.exports = {
-  NIGHTSCAPE_DB_HOST,
-  NIGHTSCAPE_DB_USER,
-  NIGHTSCAPE_DB_PASSWORD,
-  NIGHTSCAPE_DB_DATABASE,
+  DB_HOST,
+  DB_USER,
+  DB_PASS,
+  DB_NAME,
 };

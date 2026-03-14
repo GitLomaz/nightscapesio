@@ -28,10 +28,10 @@ const { unset } = require("lodash");
 
 const conn = mysql.createPool({
   connectionLimit: 10,
-  host: Creds.NIGHTSCAPE_DB_HOST,
-  user: Creds.NIGHTSCAPE_DB_USER,
-  password: Creds.NIGHTSCAPE_DB_PASSWORD,
-  database: Creds.NIGHTSCAPE_DB_DATABASE,
+  host: Creds.DB_HOST,
+  user: Creds.DB_USER,
+  password: Creds.DB_PASS,
+  database: Creds.DB_NAME,
 });
 
 class Player {

@@ -1,5 +1,4 @@
 // IMPORTED RESOURCES
-const fs = require("fs");
 const _ = require("lodash");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -14,8 +13,6 @@ const Portal = require("./classes/Portal.js");
 const Receptacle = require("./classes/Receptacle.js");
 const NPC = require("./classes/NPC.js");
 const CollectableSpawner = require("./classes/CollectableSpawner.js");
-const Filter = require("cosmic-profanity").default;
-
 let portals = [];
 let receptacles = [];
 let NPCs = [];
@@ -74,10 +71,10 @@ const { throttle } = require("lodash");
 const serv = require("http").Server(app);
 const conn = mysql.createPool({
   connectionLimit: 10,
-  host: Creds.NIGHTSCAPE_DB_HOST,
-  user: Creds.NIGHTSCAPE_DB_USER,
-  password: Creds.NIGHTSCAPE_DB_PASSWORD,
-  database: Creds.NIGHTSCAPE_DB_DATABASE,
+  host: Creds.DB_HOST,
+  user: Creds.DB_USER,
+  password: Creds.DB_PASS,
+  database: Creds.DB_NAME,
 });
 app.use(bodyParser.json());
 app.use(

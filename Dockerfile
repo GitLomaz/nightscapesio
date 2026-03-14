@@ -19,6 +19,11 @@ RUN npm install -g http-server
 # 8000 - Client
 EXPOSE 2000 8000
 
+# Environment variables for database connection
+ENV DB_HOST=localhost
+ENV DB_USER=root
+ENV DB_PASS=password
+
 # Create a startup script
 WORKDIR /app
 RUN echo '#!/bin/bash\ncd /app/server && node app.js &\ncd /app/client && http-server -p 8000 &\nwait' > start.sh && \

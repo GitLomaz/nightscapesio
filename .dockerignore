@@ -4,5 +4,6 @@ npm-debug.log
 .gitignore
 *.md
 .env
+.env.local
 .DS_Store
 server/cache
