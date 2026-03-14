@@ -13,6 +13,7 @@
   "dependencies": {
     "cors": "^2.8.0",
     "cosmic-profanity": "^1.1.2",
+    "dotenv": "^17.3.1",
     "express": "^4.16.4",
     "http": "0.0.0",
     "lodash": "^4.17.15",

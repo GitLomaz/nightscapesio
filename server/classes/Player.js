@@ -19,7 +19,6 @@ const statusEffects = require("../../client/data/statusEffects.js");
 const Equipments = require("../../client/data/equipment.js");
 const mysql = require("mysql");
 const Sql = require("./util/Sql.js");
-const Creds = require("./util/Creds.js");
 const Library = require("./util/Library.js");
 const hash = require("object-hash");
 const _ = require("lodash");
@@ -28,10 +27,10 @@ const { unset } = require("lodash");
 
 const conn = mysql.createPool({
   connectionLimit: 10,
-  host: Creds.DB_HOST,
-  user: Creds.DB_USER,
-  password: Creds.DB_PASS,
-  database: Creds.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: "nightscape",
 });
 
 class Player {

@@ -1,4 +1,5 @@
 // IMPORTED RESOURCES
+require('dotenv').config();
 const _ = require("lodash");
 const express = require("express");
 const path = require("path");
@@ -61,7 +62,6 @@ _.each(Maps, function (map) {
 
 const Location = require("./classes/Location.js");
 const Library = require("./classes/util/Library.js");
-const Creds = require("./classes/util/Creds.js");
 const Error = require("./classes/util/Error.js");
 const Sql = require("./classes/util/Sql.js");
 const mysql = require("mysql");
@@ -72,10 +72,10 @@ const { throttle } = require("lodash");
 const serv = require("http").Server(app);
 const conn = mysql.createPool({
   connectionLimit: 10,
-  host: Creds.DB_HOST,
-  user: Creds.DB_USER,
-  password: Creds.DB_PASS,
-  database: Creds.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: "nightscape",
 });
 app.use(bodyParser.json());
 app.use(

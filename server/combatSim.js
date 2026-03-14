@@ -9,7 +9,6 @@ const equipment = require("../client/data/equipment.js");
 const enemies = require("../client/data/enemies.js");
 const Equipment = require("./classes/Equipment.js");
 const Library = require("./classes/util/Library.js");
-const Creds = require("./classes/util/Creds.js");
 const mysql = require("mysql");
 const _ = require("lodash");
 const SpawnPoint = require("./classes/SpawnPoint.js");
@@ -28,10 +27,10 @@ const options = {
 const serv = require("https").Server(options, app);
 const conn = mysql.createPool({
   connectionLimit: 10,
-  host: Creds.DB_HOST,
-  user: Creds.DB_USER,
-  password: Creds.DB_PASS,
-  database: Creds.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: "nightscape",
 });
 app.use(bodyParser.json());
 app.use(
