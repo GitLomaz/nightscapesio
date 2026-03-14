@@ -757,7 +757,7 @@ setInterval(function () {
     ]);
 
     var t1 = performance.now();
-    if (t1 - t0 > 200) {
+    if (t1 - t0 > 2000) {
       console.log(
         "Call to emit took " +
           String(t1 - t0).split(".")[0] +
