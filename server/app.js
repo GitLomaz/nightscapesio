@@ -269,6 +269,12 @@ app.get("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
+
+console.log("booting app");
+console.log("__dirname:", __dirname);
+console.log("client path:", path.join(__dirname, "../client"));
+console.log("index path:", path.join(__dirname, "../client/index.html"));
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`listening on ${PORT}`);
 });
