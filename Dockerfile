@@ -1,36 +1,27 @@
-# Use Node.js LTS version
-FROM node:16
+# Use Node LTS
+FROM node:20-slim
 
-# Set working directory
+# App directory
 WORKDIR /app
 
-# Copy the entire application
+# Copy project
 COPY . .
 
-# Install server dependencies
+# Install backend dependencies
 WORKDIR /app/server
 RUN npm install
 
-# Generate cache from text files
+# Generate cache
 RUN npm run generate-cache
 
-# Install http-server globally for serving the client
-RUN npm install -g http-server
-
-# Expose ports
-# 2000 - Server (dev)
-# 8000 - Client
-EXPOSE 2000 8000
-
-# Environment variables for database connection
+# Environment variables (optional defaults)
+ENV NODE_ENV=production
 ENV DB_HOST=localhost
 ENV DB_USER=root
 ENV DB_PASS=password
 
-# Create a startup script
-WORKDIR /app
-RUN echo '#!/bin/bash\ncd /app/server && node app.js &\ncd /app/client && http-server -p 8000 &\nwait' > start.sh && \
-    chmod +x start.sh
+# Cloud Run expects the container to listen on this port
+EXPOSE 8080
 
-# Start both server and client
-CMD ["/bin/bash", "start.sh"]
+# Start backend (which should also serve /client statics)
+CMD ["node", "app.js"]

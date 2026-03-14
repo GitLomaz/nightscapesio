@@ -255,6 +255,14 @@ app.post("/api/sso", (req, res) => {
   );
 });
 
+
+app.use(express.static(path.join(__dirname, "../client")));
+
+// optional catch-all for static site routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/index.html"));
+});
+
 const PORT = process.env.PORT || 8080;
 
 serv.listen(PORT, '0.0.0.0', () => {
