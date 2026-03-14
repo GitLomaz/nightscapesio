@@ -1,0 +1,19 @@
+{
+  "name": "nightscapes",
+  "version": "1.0.0",
+  "description": "Online RPG",
+  "main": "main.js",
+  "scripts": {
+    "dev": "http-server -S -C ../server/cert.pem -K ../server/key.pem -p 8000"
+  },
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^19.0.9",
+    "http-server": "^0.12.3"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "nodemailer": "^6.8.0"
+  }
+}

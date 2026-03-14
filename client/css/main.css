@@ -1,0 +1,1427 @@
+:root {
+  --sword: url("../images/cursor-sword.png"), auto;
+  --cursor: url("../images/cursor-pointer-c.png"), auto;
+  --cursor-active: url("../images/cursor-pointer-b.png"), auto;
+}
+
+@font-face {
+  font-family: "tf";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../images/font2.ttf");
+}
+
+body {
+  background-image: url("../images/background.png");
+  cursor: var(--cursor);
+  background-position-x: -15px;
+  overflow: hidden;
+  margin: 0;
+  font-family: "tf";
+  font-size: 18px;
+  color: #dcdcdc;
+}
+
+canvas {
+  margin: 0 auto;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: #949494 #535353 #535353 #949494;
+}
+
+div {
+  user-select: none;
+}
+
+#combatItems {
+  width: 261px;
+  position: absolute;
+  left: 52px;
+  top: 660px;
+}
+
+
+#combatSkills {
+  width: 261px;
+  position: absolute;
+  left: 1000px;
+  top: 660px;
+}
+
+input {
+  font-size: 16px;
+  font-family: "tf";
+  margin: 5px;
+  width: 188px;
+  background-color: #dcdcdc;
+}
+
+#b {
+  font-family: "tf";
+  height: 0px;
+  font-size: 0;
+  position: absolute;
+}
+
+#bestiary {
+  width: 170px;
+  height: 215px;
+  text-align: left;
+  position: fixed;
+  top: 216px;
+  left: 555px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#bestiaryButton {
+  background-image: url("../images/bestiary.png");
+}
+
+#bestiaryIcon {
+  background-image: url("../images/help.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  background-color: #14001d;
+}
+
+#bestiaryStar {
+  position: absolute;
+  left: 33px;
+  top: 32px;
+  width: 16px;
+  height: 16px;
+}
+
+#bestiaryStar.bronze {
+  background-image: url(../images/stars.png);
+  background-position-y: 16px;
+}
+
+#bestiaryStar.silver {
+  background-image: url(../images/stars.png);
+  background-position-y: -16px;
+}
+
+#bestiaryStar.gold {
+  background-image: url(../images/stars.png);
+}
+
+#bestiaryStats {
+  position: absolute;
+  left: 8px;
+  top: 49px;
+}
+
+#bestiaryPages {
+  position: absolute;
+  margin-top: 10px;
+  text-align: center;
+  bottom: 5px;
+  left: 5px;
+}
+
+#bestiaryName {
+  position: absolute;
+  left: 50px;
+  top: 18px;
+}
+
+#bestiaryPageNext {
+  display: inline-block;
+  background-image: url("../images/pageNext.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#bestiaryPagePrev {
+  display: inline-block;
+  background-image: url("../images/pagePrev.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#bestiaryPageLock {
+  display: inline-block;
+  background-image: url("../images/smallLock.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 20px;
+  width: 20px;
+  margin-left: -5px;
+}
+
+#bestiaryPageNumber {
+  display: inline-block;
+  position: relative;
+  top: -7px;
+  width: 70px;
+}
+
+#calcStats {
+  width: 340px;
+  display: inline-block;
+  text-align: left;
+}
+
+#characters {
+  width: 776px;
+  left: 245px;
+}
+
+#chat {
+  width: 598px;
+  height: 248px;
+  text-align: center;
+  position: fixed;
+  top: 366px;
+  left: 341px;
+  color: #dcdcdc;
+  background-color: rgba(48, 25, 52, 0.6);
+  font-size: 14px;
+  user-select: none;
+  display: none;
+}
+
+#chatButton {
+  background-image: url("../images/chat.png");
+}
+
+#chatInput {
+  bottom: 0px;
+  position: absolute;
+}
+
+#chatLog {
+  vertical-align: bottom;
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  bottom: 0px;
+  max-height: 212px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -ms-word-break: break-all;
+  word-break: break-all;
+  word-break: break-word;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  scrollbar-color: #5b446b rgba(48, 25, 52, 0.7);
+  scrollbar-width: thin;
+}
+
+#outerChatLog {
+  height: 210px;
+  overflow-y: auto;
+  position: relative;
+}
+
+#chatText {
+  width: 550px;
+  float: left;
+  margin-bottom: 8px;
+}
+
+#chatSubmit {
+  float: right;
+  padding-bottom: 2px;
+  background-image: url("../images/chat.png");
+}
+
+#credits {
+  width: 480px;
+  padding-bottom: 4px;
+  text-align: center;
+  position: fixed;
+  top: 166px;
+  left: 390px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#combatSelect {
+  padding: 10px;
+  position: absolute;
+  bottom: -585px;
+  left: 20px;
+  background-color: #301934;
+  font-size: 14px;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+#combatSkillSelect {
+  padding: 10px;
+  position: absolute;
+  bottom: -585px;
+  left: 1020px;
+  background-color: #301934;
+  font-size: 14px;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+#discord {
+  background-image: url("../images/discord.png");
+  height: 43px;
+  width: 60px;
+  position: fixed;
+  top: 658px;
+  left: 1135px;
+  background-size: contain;
+}
+
+#equipment {
+  width: 370px;
+  height: 192px;
+  text-align: center;
+  position: fixed;
+  padding: 5px;
+  top: 216px;
+  left: 430px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 0px;
+  user-select: none;
+}
+
+#equipmentButton {
+  background-image: url("../images/equipment.png");
+}
+
+#guestWarning {
+  position: relative;
+  top: 2px;
+  left: 516px;
+  color: cadetblue;
+  font-size: 14px;
+  cursor: var(--cursor-active);
+}
+
+#register {
+  width: 212px;
+  padding-bottom: 4px;
+  text-align: center;
+  position: fixed;
+  top: 166px;
+  left: 531px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+  height: 200px;
+}
+
+#registerBtn {
+  bottom: 8px;
+  position: absolute;
+  left: 54px;
+}
+
+#help {
+  width: 480px;
+  padding-bottom: 4px;
+  text-align: center;
+  position: fixed;
+  top: 166px;
+  left: 390px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#helpButton {
+  background-image: url("../images/help.png");
+}
+
+#inventory {
+  width: 420px;
+  height: 300px;
+  text-align: center;
+  position: fixed;
+  top: 216px;
+  left: 430px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#inventoryButton {
+  background-image: url("../images/usable.png");
+}
+
+#inventoryGold {
+  position: absolute;
+  text-align: right;
+  padding: 7px;
+  bottom: 0px;
+  right: 0px;
+}
+
+#inventoryItems {
+  line-height: 0;
+}
+
+#inventoryPages {
+  margin-top: 10px;
+}
+
+#inventoryPageNext {
+  display: inline-block;
+  background-image: url("../images/pageNext.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#inventoryPagePrev {
+  display: inline-block;
+  background-image: url("../images/pagePrev.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#inventoryPageNumber {
+  display: inline-block;
+  position: relative;
+  top: -7px;
+}
+
+#itemGainList {
+  width: 243px;
+  bottom: -604px;
+  left: 42px;
+  position: fixed;
+}
+
+#itemTypes {
+  padding: 8px;
+}
+
+#login {
+  width: 228px;
+  left: 518px;
+}
+
+#mainMenuButton {
+  background-image: url("../images/menu.png");
+}
+
+#mainMenu {
+  width: 200px;
+  padding-bottom: 5px;
+  text-align: center;
+  position: fixed;
+  top: 250px;
+  left: 573px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#message {
+  color: red;
+  font-size: 22px;
+  width: 1280px;
+  text-align: center;
+  position: fixed;
+  top: 630px;
+}
+
+#notes {
+  width: 480px;
+  padding-bottom: 4px;
+  text-align: center;
+  position: fixed;
+  top: 166px;
+  left: 390px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#notes-inner {
+  height: 410px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#options {
+  width: 200px;
+  padding: 5px;
+  text-align: center;
+  position: fixed;
+  top: 250px;
+  left: 573px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#patreon {
+  background-image: url("../images/patreon.png");
+  height: 59px;
+  width: 59px;
+  position: fixed;
+  top: 653px;
+  left: 1212px;
+  background-size: contain;
+}
+
+#questButton {
+  background-image: url("../images/quest.png");
+}
+
+#questPanel {
+  width: 243px;
+  bottom: -585px;
+  left: 984px;
+  position: fixed;
+  background-color: #301934;
+  text-align: center;
+  padding: 8px;
+}
+
+#questTitle {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+#questScript {
+  font-size: 14px;
+  text-align: left;
+}
+
+#quickButtons {
+  height: 36px;
+  text-align: center;
+  position: fixed;
+  width: 450px;
+  top: 646px;
+  left: 416px;
+  font-size: 18px;
+  user-select: none;
+  background-image: url("../images/menuBG.png");  
+}
+
+#respawnPanel {
+  background-image: url("../images/respawnPanel.png");
+  width: 243px;
+  height: 92px;
+  text-align: center;
+  position: fixed;
+  opacity: 0.9;
+  top: 216px;
+  left: 510px;
+  color: #dcdcdc;
+  font-size: 18px;
+}
+
+#server {
+  width: 300px;
+  left: 482px;
+}
+
+#shopPanel {
+  width: 243px;
+  bottom: -585px;
+  left: 984px;
+  font-size: 16px;
+  position: fixed;
+  background-color: #301934;
+  text-align: center;
+  padding: 8px;
+}
+
+#shopText {
+  margin-bottom: 6px;
+}
+
+#skillList {
+  overflow-y: auto;
+  max-height: 296px;
+  overflow-x: hidden;
+  display: contents;
+}
+
+#skills {
+  width: 243px;
+  height: 330px;
+  position: fixed;
+  top: 216px;
+  left: 205px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+  padding: 5px;
+}
+
+#skillPoints {
+  margin-bottom: 12px;
+  margin-top: 12px;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  position: absolute;
+  bottom: 0px;
+}
+
+#skillsButton {
+  background-image: url("../images/skill.png");
+}
+
+#statsButton {
+  background-image: url("../images/stats.png");
+}
+
+#statHeader {
+  margin: 4px;
+}
+
+#statPoints {
+  width: 200px;
+  display: inline-block;
+}
+
+#statusEffectBar {
+  height: 36px;
+  text-align: center;
+  position: fixed;
+  width: 260px;
+  top: 614px;
+  left: 511px;
+  font-size: 18px;
+  user-select: none;
+}
+
+#stats {
+  width: 560px;
+  height: 164px;
+  text-align: center;
+  position: fixed;
+  top: 216px;
+  left: 405px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+  padding: 5px;
+}
+
+#tips {
+  width: 325px;
+  height: 100px;
+  text-align: left;
+  position: fixed;
+  top: 416px;
+  left: 478px;
+  color: #dcdcdc;
+  background-color: #301934;
+  font-size: 14px;
+  user-select: none;
+}
+
+#tip {
+  padding: 5px;
+  font-size: 16px;
+}
+
+#tipPages {
+  position: absolute;
+  left: 134px;
+  top: 71px;
+}
+
+#tipPageNext {
+  display: inline-block;
+  background-image: url("../images/pageNext.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#tipPagePrev {
+  display: inline-block;
+  background-image: url("../images/pagePrev.png");
+  background-position: center;
+  height: 20px;
+  width: 20px;
+}
+
+#version {
+  position: absolute;
+  top: 706px;
+  left: 1230px;
+  font-size: 12px;
+}
+
+#welcome {
+  margin-bottom: 10px;
+}
+
+#wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+}
+
+#wrapper > div:nth-child(1) {
+  transform-origin: 50% 0 !important;
+}
+
+.border {
+  border: 2px solid;
+  border-radius: 4px;
+  border-color: #949494 #535353 #535353 #949494;
+}
+
+.btn {
+  width: 175px;
+  text-align: center;
+  padding: 2px;
+  cursor: var(--cursor-active);
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.button {
+  background-color: #301934;
+  cursor: var(--cursor-active);
+}
+
+.button.active {
+  background-color: darkslateblue;
+}
+
+.button:hover {
+  background-color: #5b446b;
+}
+
+.btn:hover {
+  border-radius: 6px;
+}
+
+.calcStatRow {
+  line-height: 23px;
+}
+
+.calcStatRow > div {
+  display: inline-block;
+}
+
+.calcStatRow > div:nth-child(1) {
+  width: 130px;
+}
+.calcStatRow > div:nth-child(2) {
+  width: 200px;
+}
+
+.cisAmount {
+  color: rgb(220, 220, 220);
+  font-size: 12px;
+}
+
+.cisCost {
+  color: #2c7cff;
+  font-size: 12px;
+  position: absolute;
+  right: 4px;
+}
+
+.cisKey {
+  color: #16867b;
+  font-size: 14px;
+  margin: 2px;
+  position: absolute;
+  bottom: 2px;
+}
+
+.chatMessage {
+  font-size: 14px;
+  text-align: left;
+  margin-left: 3px;
+}
+
+.systemMessage {
+  color:rgb(146, 146, 146);
+}
+
+.selfMessage {
+  color: rgb(194 195 213);
+}
+
+.adminTags {
+  color: #D4AF39;
+}
+
+.supportTags {
+  color: #228C22;
+}
+
+.checkbox {
+  float: right;
+  cursor: var(--cursor-active);
+  height: 12px;
+  width: 12px;
+}
+
+.checkbox:hover {
+  background-color: #5b446b;
+}
+
+.itemSlotOverlay .cisKey {
+  bottom: -1px;
+  left: 0px;
+}
+
+.close {
+  position: absolute;
+  top: -9px;
+  left: calc(100% - 7px);
+  background-image: url("../images/x.png");
+  background-color: #301934;
+  vertical-align: middle;
+  cursor: var(--cursor-active);
+  height: 12px;
+  width: 12px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+
+.combatItemSlot, .combatSkillSlot {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  cursor: var(--cursor-active);
+  margin-right: 9px;
+}
+
+.combatItemSlotEmpty {
+  background-image: url("../images/emptyItem.png");
+}
+
+.combatSkillSlotEmpty {
+  background-image: url("../images/emptySkill.png");
+}
+
+.coverItem {
+  height: 48px;
+  width: 48px;
+  cursor: var(--cursor);
+  background-color: black;
+  opacity: 0.5;
+  position: absolute;
+  bottom: 0;
+}
+
+.disabled {
+  background-color: #535353 !important;
+  cursor: var(--cursor) !important;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #c90404;
+  float: right;
+}
+
+.empty {
+  height: 80px;
+  margin: 5px;
+  padding-top: 65px;
+}
+
+.equipmentSlot {
+  display: inline-block;
+  width: 185px;
+  font-size: 14px;
+  border-top: 1px solid #808080;
+}
+
+.equipmentName {
+  margin-top: 10px;
+  display: inline-grid;
+  width: 125px;
+}
+
+.fRight {
+  float: Right;
+}
+
+.fLeft {
+  float: left;
+}
+
+.frame {
+  margin: 5px;
+  height: 145px;
+  background-color: black;
+}
+
+.itemGainIcon {
+  width: 24px;
+  height: 24px;
+  margin: 4px;
+  display: inline-block;
+  float: left;
+}
+
+.itemGainIconCombat {
+  background-image: url("../images/combat.png");
+}
+
+.itemGainIconUsable {
+  background-image: url("../images/usable.png");
+}
+
+.itemGainIconMisc {
+  background-image: url("../images/misc.png");
+}
+
+.itemGainIconArmor {
+  background-image: url("../images/equipment.png");
+}
+
+.itemGainIconWeapon {
+  background-image: url("../images/weapon.png");
+}
+
+.itemGainIconGold {
+  background-image: url("../images/money.png");
+}
+
+.itemGainIconQuest {
+  background-image: url("../images/quest.png");
+}
+
+.itemGainPanel {
+  width: 243px;
+  top: 35px;
+  left: 510px;
+}
+
+.itemGainPanel {
+  width: 100%;
+  height: 32px;
+  text-align: center;
+  margin-bottom: 5px;
+  color: #dcdcdc;
+  font-size: 12px;
+  background-color: rgb(48, 25, 52, 0.9);
+}
+
+.itemGainText {
+  margin: 4px;
+  line-height: 32px;
+}
+
+.itemFilterIcon {
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 3px;
+  display: inline-block;
+  cursor: var(--cursor-active);
+}
+
+.itemSlot {
+  line-height: 14px;
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  position: relative;
+  background-image: url("../images/itemContainer.png");
+}
+
+.itemSlotEmpty {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  position: relative;
+  background-image: url("../images/itemContainerEmpty.png");
+}
+
+.itemSlot.usable:hover {
+  background-color: #2b5cb1;
+}
+.itemSlot.usable {
+  background-color: #717f93;
+}
+.itemSlot.usable.selected {
+  background-color: #4b89e0;
+}
+
+.itemSlot.combat:hover {
+  background-color: #c03737;
+}
+.itemSlot.combat {
+  background-color: #8b3749;
+}
+
+.itemSlot.normal:hover {
+  background-color: #362400;
+}
+.itemSlot.normal {
+  background-color: #624712;
+}
+.itemSlot.normal.selected {
+  background-color: #a18141;
+}
+
+.itemSlot.magic:hover {
+  background-color: #040036;
+}
+.itemSlot.magic {
+  background-color: #104274;
+}
+.itemSlot.magic.selected {
+  background-color: #497fb4;
+}
+
+.itemSlot.rare:hover, .itemSlot.self:hover {
+  background-color: #023627;
+}
+.itemSlot.rare, .itemSlot.self {
+  background-color: #006546;
+}
+.itemSlot.rare.selected, .itemSlot.self.selected {
+  background-color: #389b7d;
+}
+
+.itemSlot.unique:hover {
+  background-color: #2d3400;
+}
+.itemSlot.unique {
+  background-color: #839500;
+}
+.itemSlot.unique.selected, .itemSlot.queued {
+  background-color: #a8b927;
+}
+
+.itemSlot.gold:hover {
+  background-color: #2c1031;
+}
+.itemSlot.gold {
+  background-color: #773083;
+}
+
+.itemSlot.exp:hover {
+  background-color: #1e1032;
+}
+.itemSlot.exp {
+  background-color: #543084;
+}
+
+.itemSlot.kill:hover {
+  background-color: #3a001e;
+}
+.itemSlot.kill {
+  background-color: #800042;
+}
+
+.itemSlotOverlay {
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  text-align: left;
+  font-size: 12px;
+  position: absolute;
+}
+
+.locked {
+  background-image: url("../images/lock.png");
+  background-position-x: 4px;
+  background-position-y: 18px;
+  background-repeat: no-repeat;
+  cursor: var(--cursor);
+}
+
+.option {
+  text-align: left;
+  margin-bottom: 4px;
+  margin-top: 6px;
+}
+
+.panel {
+  background-color: #14001d;
+  padding: 6px;
+  text-align: center;
+  position: fixed;
+  opacity: 0.9;
+  top: 316px;
+}
+
+.patchNotes {
+  text-align: left;
+  line-height: 16 px;
+  margin-left: 8px;
+  color: #bcbcbc;
+}
+
+.plus {
+  background-image: url("../images/plus.png");
+  background-color: #03611f;
+  vertical-align: middle;
+  cursor: var(--cursor-active);
+  height: 12px;
+  width: 12px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+
+.plus:hover {
+  background-color: #007c25;
+  cursor: var(--cursor-active);
+}
+
+.pricy {
+  color: rgba(145, 31, 31, 0.8);
+}
+
+.quickButton {
+  background-color: #301934;
+  cursor: var(--cursor-active);
+  height: 24px;
+  width: 24px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.quickButton.open {
+  background-color: darkslateblue;
+}
+
+.quickButton:hover {
+  background-color: #5b446b;
+}
+
+.selected {
+  background-color: darkslateblue;
+}
+
+.shopRow {
+  border-top: 1px solid #cccc;
+  width: 244px;
+  margin: 2px;
+  padding-top: 4px;
+}
+
+.shopRowIcon {
+  display: inline-block !important;
+}
+
+.shopRowRight {
+  display: inline-block;
+  width: 195px;
+}
+
+.shopRowText {
+  font-size: 14px;
+  position: relative;
+  text-align: left;
+  left: 8px;
+  top: -14px;
+}
+
+.shopRowValue {
+  font-size: 14px;
+  position: relative;
+  text-align: left;
+  left: 8px;
+  top: -12px;
+}
+
+
+.skillRow {
+  border-bottom: 1px solid #cccc;
+  width: 244px;
+  margin: 2px;
+  padding-bottom: 2px;
+}
+
+.skillRow.locked {
+  color: dimgray;
+}
+
+.skillPlus {
+  background-image: url(../images/plus.png);
+  background-color: #03611f;
+  background-size: contain;
+  vertical-align: middle;
+  cursor: var(--cursor-active);
+  height: 24px;
+  width: 24px;
+  display: inline-block;
+  margin-top: -40px;
+  margin-left: -14px;
+  position: relative;
+}
+
+.skillPlus:hover {
+  background-color: #007c25;
+  cursor: var(--cursor-active);
+}
+
+.skillRowRight {
+  display: inline-block;
+  width: 160px;
+}
+
+.slot {
+  width: 130px;
+  height: 160px;
+  text-align: center;
+  padding: 2px;
+  cursor: var(--cursor-active);
+  display: inline-block;
+  margin-top: 8px;
+  vertical-align: top;
+  font-size: 16px;
+}
+
+.slot:hover {
+  border-radius: 6px;
+}
+
+.sprite {
+  background-image: url("../images/sprites/players/knightThumb.png");
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.statRow {
+  line-height: 22px;
+}
+
+.statRow > div {
+  display: inline-block;
+}
+
+.statRow > div:nth-child(2) {
+  width: 75px;
+}
+/* 
+.statRow {
+  border-right: 1px solid #808080;
+} */
+
+.statRow:last-child {
+  border-bottom: 1px solid #808080;
+}
+
+.statRow:nth-child(odd) {
+  border: 1px solid #808080;
+}
+
+.statRow:nth-child(even) {
+  border-left: 1px solid #808080;
+  border-right: 1px solid #808080;
+}
+
+.statusEffect {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-color: #301934;
+  border: 2px solid;
+  border-radius: 4px;
+  border-color: #535353;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.tooltip {
+  opacity: 0.95;
+  width: 160px;
+  bottom: 60px;
+  left: -56px;
+  position: absolute;
+  text-align: left;
+  background-color: #301934;
+  color: #dcdcdc;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.statRow > .tooltip {
+  left: -185px;
+  font-size: 12px;
+  line-height: 12px;
+}
+
+.quickButton > .tooltip {
+  left: 135px;
+  top: -70px;
+  height: 14px;
+  font-size: 12px;
+  line-height: 12px;
+}
+
+.statusEffect > .tooltip {
+  top: -105px;
+  height: 80px;
+  font-size: 12px;
+  line-height: 12px;
+  margin-left: 95px;
+}
+
+#bestiaryStar > .tooltip {
+  left: -55px;
+  bottom: 30px;
+  font-size: 12px;
+  line-height: 12px;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(48, 25, 52, 0.7);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #5b446b;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #5b446b;
+}
+
+/* SLIDER CSS NOW */
+
+.volumeSlider {
+  width: 100px;
+  height: 24px;
+  cursor: var(--cursor-active);
+  margin: 0;
+}
+
+.volumeSliderMute {
+  width: 24px;
+  height: 24px;
+  background-image: url("../images/sound.png");
+  margin-top: 1px;
+  cursor: var(--cursor-active);
+}
+
+input[type=range] {
+  height: 18px;
+  -webkit-appearance: none;
+  width: 170px;
+  background-color: inherit;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: var(--cursor-active);
+  box-shadow: 1px 1px 1px #000000;
+  background: #5B446B;
+  border-radius: 4px;
+  border: 1px solid #000000;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0px 0px 0px 3071a9;
+  height: 15px;
+  width: 15px;
+  border-radius: 24px;
+  background: darkslateblue;
+  cursor: var(--cursor-active);
+  -webkit-appearance: none;
+  margin-top: -6.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #5B446B;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  cursor: var(--cursor-active);
+  box-shadow: 1px 1px 1px #000000;
+  background: #5B446B;
+  border-radius: 4px;
+  border: 1px solid #000000;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0px 0px 0px 3071a9;
+  height: 15px;
+  width: 15px;
+  border-radius: 24px;
+  background: #7e7e7e;
+  cursor: var(--cursor-active);
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 4px;
+  cursor: var(--cursor-active);
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #5B446B;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-fill-upper {
+  background: #5B446B;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-thumb {
+  margin-top: 1px;
+  box-shadow: 0px 0px 0px 3071a9;
+  height: 15px;
+  width: 15px;
+  border-radius: 24px;
+  background: #7e7e7e;
+  cursor: var(--cursor-active);
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #5B446B;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #5B446B;
+}

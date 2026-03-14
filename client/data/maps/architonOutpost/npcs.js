@@ -1,0 +1,56 @@
+let npcs = [
+  {
+    id: 0,
+    location: { map: "ArchitonOutpost", x: 32, y: 17 },
+    type: "quest",
+    radius: 3,
+    name: "Peter Newhouse",
+    title: "Outpost Alchemist",
+    image: "player_57",
+    questIds: [2],
+    noActions: "Heya, not much else to do here..",
+  },
+  {
+    id: 1,
+    location: { map: "ArchitonOutpost", x: 30, y: 45 },
+    type: "quest",
+    radius: 3,
+    name: "Slimy Steve",
+    title: "Slime Collector",
+    image: "player_01",
+    questIds: [0, 1, 11],
+    noActions: "Heya, not much else to do here..",
+  },
+  {
+    id: 3,
+    location: { map: "ArchitonOutpost", x: 53, y: 19 },
+    type: "shop",
+    radius: 3,
+    name: "Grumpy Guss",
+    title: "Traveling Merchant",
+    image: "player_223",
+    items: [17, 4, 19, 33],
+    // equipment: [1, 3, 5, 7],
+    text: [
+      "Hey there, anything I can interest you in?",
+      "Spend some gold!",
+      "Ain't gonna find better anywhere else!",
+      "You know you want it, just buy it!",
+      "What if you don't buy it, and you end up needing it?",
+    ],
+  },
+  {
+    id: 22,
+    location: { map: "ArchitonOutpost", x: 49, y: 32 },
+    type: "quest",
+    radius: 3,
+    name: "Emery Taillepied",
+    title: "Collector",
+    image: "player_199",
+    questIds: [13],
+    noActions: "No Quests.",
+  },
+];
+try {
+  module.exports = npcs;
+} catch (err) {}
