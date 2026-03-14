@@ -276,7 +276,7 @@ console.log("__dirname:", __dirname);
 console.log("client path:", path.join(__dirname, "../client"));
 console.log("index path:", path.join(__dirname, "../client/index.html"));
 
-app.listen(PORT, "0.0.0.0", () => {
+serv.listen(PORT, "0.0.0.0", () => {
   console.log(`listening on ${PORT}`);
 });
 
@@ -315,7 +315,13 @@ _.each(collectableSpawners, function (sp) {
   counter++;
 });
 
-let io = require("socket.io")(serv, {});
+let io = require("socket.io")(serv, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 console.log("========== Nightscape Running ==========");
 
 io.sockets.on("connection", function (socket) {

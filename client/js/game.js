@@ -1,6 +1,6 @@
 $(document).ready(function () {
   if (window.location.href.includes("guest")) {
-    socket = io(":2020", { secure: true, query: "guest=1" });
+    socket = io({ secure: true, query: "guest=1" });
   } else if (window.location.href.includes("dev")) {
     socket = io(":2000", {
       secure: true,
@@ -8,12 +8,12 @@ $(document).ready(function () {
     });
   } else if (window.location.href.includes("localhost")) {
     if (!window.location.href.includes("other")) {
-      socket = io(":2020", { secure: true, query: "localhost=true&id=5" });
+      socket = io({ secure: true, query: "localhost=true&id=5" });
     } else {
-      socket = io(":2020", { secure: true, query: "localhost=true&id=1203" });
+      socket = io({ secure: true, query: "localhost=true&id=1203" });
     }
   } else {
-    socket = io(":2020", {
+    socket = io({
       secure: true,
       query: "token=" + token + "&id=" + char,
     });
