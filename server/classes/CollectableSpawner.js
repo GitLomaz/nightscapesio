@@ -2,8 +2,8 @@ const Library = require("./util/Library.js");
 const Location = require("./Location.js");
 const Collectable = require("./Collectable.js");
 const collectables = require("../../client/data/collectables.js");
+const CACHE = require("./util/Cache.js");
 const _ = require("lodash");
-const fs = require("fs");
 
 class CollectableSpawner {
   constructor(obj, id) {
@@ -12,21 +12,20 @@ class CollectableSpawner {
     this.location = new Location(obj.location);
     this.tickCount = 0;
     this.collectableList = [];
-    let fileKey =
-      "./cache/sp-" +
+    const cacheKey =
       this.location.map +
       "-" +
       this.location.x +
       "-" +
       this.location.y +
       "-" +
-      this.radius +
-      ".txt";
-    if (!fs.existsSync(fileKey)) {
-      this.walkableTiles = this.location.getWalkableTiles(this.radius);
-      fs.writeFileSync(fileKey, JSON.stringify(this.walkableTiles));
+      this.radius;
+    
+    if (CACHE[cacheKey]) {
+      this.walkableTiles = CACHE[cacheKey];
     } else {
-      this.walkableTiles = JSON.parse(fs.readFileSync(fileKey));
+      this.walkableTiles = this.location.getWalkableTiles(this.radius);
+      console.warn(`Cache miss for collectable spawner: ${cacheKey}`);
     }
 
     if (this.walkableTiles.length === 0) {

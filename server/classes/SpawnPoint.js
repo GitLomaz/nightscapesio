@@ -2,8 +2,8 @@ const Enemy = require("./Enemy.js");
 const Location = require("./Location.js");
 const Library = require("./util/Library.js");
 const enemies = require("../../client/data/enemies.js");
+const CACHE = require("./util/Cache.js");
 const _ = require("lodash");
-const fs = require("fs");
 
 class SpawnPoint {
   static walkableTileLibrary = [];
@@ -12,21 +12,20 @@ class SpawnPoint {
     this.id = id;
     this.location = new Location(obj.location);
     this.tickCount = Library.getRandomInt(1, 100);
-    let fileKey =
-      "./cache/sp-" +
+    const cacheKey =
       this.location.map +
       "-" +
       this.location.x +
       "-" +
       this.location.y +
       "-" +
-      this.radius +
-      ".txt";
-    if (!fs.existsSync(fileKey)) {
-      this.walkableTiles = this.location.getWalkableTiles(this.radius);
-      fs.writeFileSync(fileKey, JSON.stringify(this.walkableTiles));
+      this.radius;
+    
+    if (CACHE[cacheKey]) {
+      this.walkableTiles = CACHE[cacheKey];
     } else {
-      this.walkableTiles = JSON.parse(fs.readFileSync(fileKey));
+      this.walkableTiles = this.location.getWalkableTiles(this.radius);
+      console.warn(`Cache miss for spawn point: ${cacheKey}`);
     }
 
     if (this.walkableTiles.length === 0) {

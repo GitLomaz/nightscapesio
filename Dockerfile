@@ -11,6 +11,9 @@ COPY . .
 WORKDIR /app/server
 RUN npm install
 
+# Generate cache from text files
+RUN npm run generate-cache
+
 # Install http-server globally for serving the client
 RUN npm install -g http-server
 
