@@ -77,7 +77,6 @@ const conn = mysql.createPool({
   password: process.env.DB_PASS,
   database: "nightscape",
 });
-console.log(process.env.DB_HOST)
 app.use(bodyParser.json());
 app.use(
   cors({
@@ -326,20 +325,31 @@ let io = require("socket.io")(serv, {
 console.log("========== Nightscape Running ==========");
 
 io.sockets.on("connection", function (socket) {
+  console.log('[DEBUG] New socket connection attempt');
+  console.log('[DEBUG] Socket ID:', socket.id);
+  console.log('[DEBUG] Query params:', socket.handshake.query);
+  console.log('[DEBUG] Headers:', socket.handshake.headers);
+  
   if (socket.handshake.query.type === "polling") {
+    console.log('[DEBUG] Polling connection type');
     socket.on("pingu", function () {
       socket.emit("pongu", {
         len: Object.keys(Library.SOCKET_LIST).length || 0,
       });
     });
   } else {
+    console.log('[DEBUG] Regular game connection');
     try {
       if (socket.handshake.query.guest) {
+        console.log('[DEBUG] Guest player connecting');
         socket.id = Library.getRandomInt(-100000, 0);
       } else {
+        console.log('[DEBUG] Regular player connecting with ID:', socket.handshake.query.id);
         socket.id = socket.handshake.query.id;
       }
+      console.log('[DEBUG] Assigned socket ID:', socket.id);
       Library.SOCKET_LIST[socket.id] = socket;
+      console.log('[DEBUG] Creating new Player instance');
       socket.player = new Player(
         socket.id,
         socket.handshake.query.token,
@@ -347,6 +357,7 @@ io.sockets.on("connection", function (socket) {
         socket.handshake.query.guest
       );
       socket.hashes = [];
+      console.log('[DEBUG] Calling createOrLoadPlayer()');
       socket.player.createOrLoadPlayer();
 
       socket.on("loaded", function () {
@@ -709,8 +720,11 @@ io.sockets.on("connection", function (socket) {
         }
       });
     } catch (error) {
-      console.log("CATCHING ERROR:");
-      console.log(error);
+      console.log("[DEBUG] ========== SOCKET CONNECTION ERROR ==========");
+      console.log("[DEBUG] Error message:", error.message);
+      console.log("[DEBUG] Error stack:", error.stack);
+      console.log("[DEBUG] Socket query:", socket.handshake.query);
+      console.log("[DEBUG] ===============================================");
     }
   }
 });

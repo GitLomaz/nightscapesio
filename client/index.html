@@ -33,6 +33,38 @@
     </script>
   </head>
   <body oncontextmenu="return false;" style="margin: 0">
+    <!-- Debug Panel -->
+    <div id="debugPanel" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 99999; max-width: 400px; border: 2px solid #0f0;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <div style="color: #fff; font-weight: bold;">🔧 DEBUG INFO 🔧</div>
+        <button id="debugToggle" style="background: #333; color: #0f0; border: 1px solid #0f0; cursor: pointer; padding: 2px 8px;">Hide</button>
+      </div>
+      <div id="debugContent">
+        <div id="debugSocketStatus">Socket: Initializing...</div>
+        <div id="debugSocketId">Socket ID: Not connected</div>
+        <div id="debugUrl">URL: <span id="debugUrlValue"></span></div>
+        <div id="debugMode">Mode: <span id="debugModeValue"></span></div>
+        <div id="debugToken">Token: <span id="debugTokenValue"></span></div>
+        <div id="debugChar">Character: <span id="debugCharValue"></span></div>
+        <div id="debugEvents" style="margin-top: 5px; border-top: 1px solid #0f0; padding-top: 5px; max-height: 150px; overflow-y: auto;">
+          <div style="color: #fff; font-size: 10px;">Events:</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Debug panel toggle
+      $(document).ready(function() {
+        $('#debugToggle').on('click', function() {
+          if ($('#debugContent').is(':visible')) {
+            $('#debugContent').hide();
+            $(this).text('Show');
+          } else {
+            $('#debugContent').show();
+            $(this).text('Hide');
+          }
+        });
+      });
+    </script>
     <span id="b">asd</span>
     <div id="wrapperContainer">
       <div id="wrapper" style="display: flex; justify-content: center; height: 100vh"></div>

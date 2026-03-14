@@ -1,33 +1,108 @@
 $(document).ready(function () {
+  console.log('[DEBUG] Document ready, initializing socket connection');
+  console.log('[DEBUG] Current URL:', window.location.href);
+  console.log('[DEBUG] Token:', token);
+  console.log('[DEBUG] Character:', char);
+  
+  // Helper function to add debug events
+  function addDebugEvent(msg, color = '#0f0') {
+    const timestamp = new Date().toLocaleTimeString();
+    const eventDiv = $('<div>').css('color', color).text(`[${timestamp}] ${msg}`);
+    $('#debugEvents').append(eventDiv);
+    $('#debugEvents').scrollTop($('#debugEvents')[0].scrollHeight);
+  }
+  
+  // Update debug panel
+  $('#debugUrlValue').text(window.location.href);
+  $('#debugTokenValue').text(token || 'NOT SET (from URL params)').css('color', token ? '#0f0' : '#ff0');
+  $('#debugCharValue').text(char || 'NOT SET (from URL params)').css('color', char ? '#0f0' : '#ff0');
+  
+  if (!token && !window.location.href.includes("guest") && !window.location.href.includes("localhost")) {
+    addDebugEvent('WARNING: No token in URL! Add ?token=xxx&id=xxx to URL', '#ff0');
+  }
+  
+  let mode = 'standard';
   if (window.location.href.includes("guest")) {
+    console.log('[DEBUG] Guest mode detected');
+    mode = 'guest';
     socket = io({ secure: true, query: "guest=1" });
   } else if (window.location.href.includes("dev")) {
+    console.log('[DEBUG] Dev mode detected');
+    mode = 'dev';
     socket = io(":2000", {
       secure: true,
       query: "token=" + token + "&id=" + char,
     });
   } else if (window.location.href.includes("localhost")) {
+    console.log('[DEBUG] Localhost mode detected');
+    mode = 'localhost';
     if (!window.location.href.includes("other")) {
+      console.log('[DEBUG] Using default localhost config');
       socket = io({ secure: true, query: "localhost=true&id=5" });
     } else {
+      console.log('[DEBUG] Using alternate localhost config');
+      mode = 'localhost-other';
       socket = io({ secure: true, query: "localhost=true&id=1203" });
     }
   } else {
+    console.log('[DEBUG] Standard mode with token and char');
     socket = io({
       secure: true,
       query: "token=" + token + "&id=" + char,
     });
   }
+  
+  $('#debugModeValue').text(mode);
+  console.log('[DEBUG] Socket object created:', socket);
+  addDebugEvent(`Socket initializing in ${mode} mode`);
+
+  // Socket connection events
+  socket.on('connect', function() {
+    console.log('[DEBUG] Socket connected! Socket ID:', socket.id);
+    $('#debugSocketStatus').text('Socket: ✅ CONNECTED').css('color', '#0f0');
+    $('#debugSocketId').text('Socket ID: ' + socket.id);
+    addDebugEvent('Socket connected! ID: ' + socket.id, '#0f0');
+  });
+  
+  socket.on('disconnect', function(reason) {
+    console.log('[DEBUG] Socket disconnected. Reason:', reason);
+    $('#debugSocketStatus').text('Socket: ❌ DISCONNECTED').css('color', '#f00');
+    $('#debugSocketId').text('Socket ID: Disconnected');
+    addDebugEvent('Socket disconnected: ' + reason, '#ff0');
+  });
+  
+  socket.on('connect_error', function(error) {
+    console.error('[DEBUG] Socket connection error:', error);
+    $('#debugSocketStatus').text('Socket: ⚠️ CONNECTION ERROR').css('color', '#f00');
+    addDebugEvent('Connection error: ' + error.message, '#f00');
+  });
+  
+  socket.on('error', function(error) {
+    console.error('[DEBUG] Socket error:', error);
+    addDebugEvent('Socket error: ' + error, '#f00');
+  });
+  
+  socket.on('reconnect_attempt', function() {
+    console.log('[DEBUG] Attempting to reconnect...');
+    addDebugEvent('Reconnecting...', '#ff0');
+  });
 
   socket.on("failedToLoad", function (data) {
-    console.log("failed to load?");
+    console.log('[DEBUG] Failed to load event received:', data);
+    addDebugEvent('Failed to load player', '#f00');
     window.location.replace("https://www.nightscapes.io");
   });
 
   socket.on("recievePlayer", function (data) {
+    console.log('[DEBUG] Received player data:', data);
+    addDebugEvent('Received player data', '#0f0');
     if (window.location.href.includes("dev") && data.tester === 0) {
+      console.log('[DEBUG] Not a tester, redirecting...');
+      addDebugEvent('Not a tester - redirecting', '#ff0');
       window.location.replace("https://www.nightscapes.io");
     } else {
+      console.log('[DEBUG] Player data valid, starting game');
+      addDebugEvent('Starting game...', '#0f0');
       playerData = data;
       startGame();
     }
