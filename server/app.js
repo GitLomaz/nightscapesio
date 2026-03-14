@@ -255,17 +255,21 @@ app.post("/api/sso", (req, res) => {
   );
 });
 
+// API routes first
+app.get("/health", (req, res) => {
+  res.status(200).send("ok");
+});
 
+// static files
 app.use(express.static(path.join(__dirname, "../client")));
 
-// optional catch-all for static site routes
+// catch-all last
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
 const PORT = process.env.PORT || 8080;
-
-serv.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`listening on ${PORT}`);
 });
 
