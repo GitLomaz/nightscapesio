@@ -14,14 +14,17 @@ const _ = require("lodash");
 const SpawnPoint = require("./classes/SpawnPoint.js");
 
 // SERVER AND DB CONFIG
+const DOMAIN = process.env.DOMAIN || "nightscapes.io";
+const PORT = process.env.PORT || 4040;
+
 const options = {
   key: fs.readFileSync(
     process.env.NIGHTSCAPE_PRIVATE_KEY_FILE ||
-      "/etc/letsencrypt/live/nightscapes.io/privkey.pem"
+      `/etc/letsencrypt/live/${DOMAIN}/privkey.pem`
   ),
   cert: fs.readFileSync(
     process.env.NIGHTSCAPE_PUBLIC_KEY_FILE ||
-      "/etc/letsencrypt/live/nightscapes.io/fullchain.pem"
+      `/etc/letsencrypt/live/${DOMAIN}/fullchain.pem`
   ),
 };
 const serv = require("https").Server(options, app);
@@ -30,7 +33,7 @@ const conn = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: "nightscape",
+  database: process.env.DB_NAME || "nightscape",
 });
 app.use(bodyParser.json());
 app.use(
@@ -47,9 +50,9 @@ app.use(function (req, res, next) {
   next();
 });
 
-serv.listen(4040);
+serv.listen(PORT);
 let io = require("socket.io")(serv, {});
-console.log("========== Nightscape Running ==========");
+console.log(`========== Nightscape Running on port ${PORT} ==========`);
 
 for (let enemyIndex = 0; enemyIndex < enemies.length; ) {
   let p;

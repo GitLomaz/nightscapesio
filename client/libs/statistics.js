@@ -49,9 +49,10 @@ function SUBMIT_STATISTIC(game, metric, value) {
   // Create an object with the data to send
   var dataToSend = {"platform":platform, "game": game, "metric": metric, "value": value, "guid": STATS_USER_STAT_GUID};
   // Make the AJAX POST request
+  var statsUrl = window.CONFIG?.STATS_URL || (document.location.protocol + "//us-dev.nightscapes.io:3030/stats");
   $.ajax({
     contentType: 'application/json',
-    url:  document.location.protocol + "//us-dev.nightscapes.io:3030/stats",
+    url: statsUrl,
     type: "POST",
     dataType: "JSON",
     data: JSON.stringify(dataToSend),

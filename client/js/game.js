@@ -1,4 +1,8 @@
 $(document).ready(function () {
+  // Configuration
+  const BASE_URL = window.location.origin;
+  const DEV_PORT = window.CONFIG?.DEV_PORT || ':2000';
+  
   console.log('[DEBUG] Document ready, initializing socket connection');
   console.log('[DEBUG] Current URL:', window.location.href);
   console.log('[DEBUG] Token:', token);
@@ -29,7 +33,7 @@ $(document).ready(function () {
   } else if (window.location.href.includes("dev")) {
     console.log('[DEBUG] Dev mode detected');
     mode = 'dev';
-    socket = io(":2000", {
+    socket = io(DEV_PORT, {
       secure: true,
       query: "token=" + token + "&id=" + char,
     });
@@ -90,7 +94,7 @@ $(document).ready(function () {
   socket.on("failedToLoad", function (data) {
     console.log('[DEBUG] Failed to load event received:', data);
     addDebugEvent('Failed to load player', '#f00');
-    window.location.replace("https://www.nightscapes.io");
+    window.location.replace(BASE_URL);
   });
 
   socket.on("recievePlayer", function (data) {
@@ -99,7 +103,7 @@ $(document).ready(function () {
     if (window.location.href.includes("dev") && data.tester === 0) {
       console.log('[DEBUG] Not a tester, redirecting...');
       addDebugEvent('Not a tester - redirecting', '#ff0');
-      window.location.replace("https://www.nightscapes.io");
+      window.location.replace(BASE_URL);
     } else {
       console.log('[DEBUG] Player data valid, starting game');
       addDebugEvent('Starting game...', '#0f0');
@@ -120,11 +124,11 @@ $(document).ready(function () {
   });
 
   $("#menuBtn").on("click", function () {
-    window.location.replace("https://www.nightscapes.io");
+    window.location.replace(BASE_URL);
   });
 
   $("#menuRespawnBtn").on("click", function () {
-    window.location.replace("https://www.nightscapes.io");
+    window.location.replace(BASE_URL);
   });
 
   $("#bestiaryPageLock").on("click", function () {

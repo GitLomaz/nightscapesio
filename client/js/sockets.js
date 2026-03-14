@@ -755,12 +755,12 @@ function addGameSockets() {
   });
 
   socket.on("registerSuccess", function (data) {
-    window.location.replace("https://www.nightscapes.io/?logout=2");
+    window.location.replace(window.location.origin + "/?logout=2");
   });
 
   socket.on("disconnect", function () {
     removeGameSockets();
-    window.location.replace("https://www.nightscapes.io/?logout=3");
+    window.location.replace(window.location.origin + "/?logout=3");
   });
 }
 
