@@ -77,6 +77,7 @@ const conn = mysql.createPool({
   password: process.env.DB_PASS,
   database: "nightscape",
 });
+console.log(process.env.DB_HOST)
 app.use(bodyParser.json());
 app.use(
   cors({
