@@ -35,31 +35,35 @@ class Collectable {
     this.collecter = player;
     let that = this;
     this.collectionTimeout = setTimeout(function () {
-      that.drops.forEach((drop) => {
-        let chance = drop.chance;
-        if (chance > getRandomInt(0, 100)) {
-          player.items[drop.item].increase();
-        }
-      });
-      that.questDrops.forEach((drop) => {
-        if (player.quests[drop.questId].status === 1) {
-          let reqirements =
-            player.quests[drop.questId].requirements[
-              player.quests[drop.questId].step
-            ].collect;
-          reqirements.forEach((req) => {
-            if (
-              req.id === drop.item &&
-              player.items[req.id].quantity < (req.count || 0)
-            ) {
-              let chance = drop.chance;
-              if (chance > getRandomInt(0, 100)) {
-                player.items[drop.item].increase();
+      if (that.drops && that.drops.length > 0) {
+        that.drops.forEach((drop) => {
+          let chance = drop.chance;
+          if (chance > getRandomInt(0, 100)) {
+            player.items[drop.item].increase();
+          }
+        });
+      }
+      if (that.equipmentDrops && that.equipmentDrops.length > 0) {
+        that.questDrops.forEach((drop) => {
+          if (player.quests[drop.questId].status === 1) {
+            let reqirements =
+              player.quests[drop.questId].requirements[
+                player.quests[drop.questId].step
+              ].collect;
+            reqirements.forEach((req) => {
+              if (
+                req.id === drop.item &&
+                player.items[req.id].quantity < (req.count || 0)
+              ) {
+                let chance = drop.chance;
+                if (chance > getRandomInt(0, 100)) {
+                  player.items[drop.item].increase();
+                }
               }
-            }
-          });
-        }
-      });
+            });
+          }
+        });
+      }
       delete that.spawnPoint.collectableList[that.hash];
       delete OBJECTS.COLLECTABLES[that.hash];
     }, this.collectionTimer);

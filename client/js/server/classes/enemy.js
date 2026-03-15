@@ -178,21 +178,23 @@ class Enemy {
     }
     let remainingLife = (this.health / this.maxHealth) * 100;
     const that = this;
-    this.skills.forEach(function (skill) {
-      if (skill.currentCooldown == 0) {
-        if (
-          skill.minHealth <= remainingLife &&
-          skill.maxHealth >= remainingLife &&
-          getRandomInt(0, 100) < skill.chance
-        ) {
-          skill.currentCooldown = skill.cooldown;
-          that.useSkill(skill);
-          action = "skill";
+    if (this.skills && this.skills.length > 0) {
+      this.skills.forEach(function (skill) {
+        if (skill.currentCooldown == 0) {
+          if (
+            skill.minHealth <= remainingLife &&
+            skill.maxHealth >= remainingLife &&
+            getRandomInt(0, 100) < skill.chance
+          ) {
+            skill.currentCooldown = skill.cooldown;
+            that.useSkill(skill);
+            action = "skill";
+          }
+        } else {
+          skill.currentCooldown--;
         }
-      } else {
-        skill.currentCooldown--;
-      }
-    });
+      });
+    }
     if (action == "attack") {
       this.basicAttack();
     }
@@ -201,7 +203,7 @@ class Enemy {
   move(newLocation) {
     this.location = newLocation;
     let that = this;
-    SOCKET_LIST.forEach(function (socket) {
+    Object.values(SOCKET_LIST).forEach((socket) => {
       if (socket.player.target === that) {
         if (socket.player.moves.length > 0) {
           socket.player.moveToTarget();

@@ -57,7 +57,7 @@ class SpawnPoint {
         }
         if (spawnEnemy) {
           this.spawnEnemy();
-          console.warn("Spawning enemy at spawn point " + this.id);
+          // console.warn("Spawning enemy at spawn point " + this.id);
           this.spawnCounter = this.respawn;
         }
       } else {

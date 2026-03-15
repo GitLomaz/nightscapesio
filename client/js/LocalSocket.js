@@ -9,6 +9,7 @@ class LocalSocket {
     this.handshake = {
       query: {},
     };
+    console.log('[LocalSocket] Created socket:', this.id);
   }
 
   generateId() {
@@ -21,6 +22,7 @@ class LocalSocket {
       this.listeners[eventName] = [];
     }
     this.listeners[eventName].push(callback);
+    console.log(`[LocalSocket] ${this.id} registered listener for '${eventName}'`);
   }
 
   // Remove event listener
@@ -32,10 +34,15 @@ class LocalSocket {
     } else {
       delete this.listeners[eventName];
     }
+    console.log(`[LocalSocket] ${this.id} removed listener for '${eventName}'`);
   }
 
   // Emit event (triggers local handlers immediately)
   emit(eventName, data) {
+    const hasData = data !== undefined;
+    const dataPreview = hasData ? (typeof data === 'object' ? JSON.stringify(data).substring(0, 100) : data) : 'no data';
+    // console.log(`[LocalSocket] ${this.id} emitting '${eventName}' (${this.listeners[eventName]?.length || 0} listeners) - ${dataPreview}`);
+    
     // Use setTimeout to make it async like real socket.io
     setTimeout(() => {
       if (this.listeners[eventName]) {
@@ -43,21 +50,25 @@ class LocalSocket {
           try {
             callback(data);
           } catch (error) {
-            console.error(`Error in ${eventName} handler:`, error);
+            console.error(`[LocalSocket] Error in ${eventName} handler:`, error);
           }
         });
+      } else {
+        console.warn(`[LocalSocket] ${this.id} emitted '${eventName}' but no listeners registered`);
       }
     }, 0);
   }
 
   // Disconnect
   disconnect() {
+    console.log(`[LocalSocket] ${this.id} disconnecting...`);
     this.connected = false;
     this.emit('disconnect');
   }
 
   // Connect
   connect(query = {}) {
+    console.log(`[LocalSocket] ${this.id} connecting with query:`, query);
     this.connected = true;
     this.handshake.query = query;
     this.emit('connect');
@@ -69,6 +80,7 @@ class LocalSocketServer {
   constructor() {
     this.sockets = {};
     this.listeners = {};
+    console.log('[LocalSocketServer] Server created');
   }
 
   // Create a new socket connection
@@ -76,13 +88,18 @@ class LocalSocketServer {
     const socket = new LocalSocket();
     socket.handshake.query = query;
     this.sockets[socket.id] = socket;
+    console.log('[LocalSocketServer] Created socket with query:', query);
+    console.log('[LocalSocketServer] Total sockets:', Object.keys(this.sockets).length);
     
     // Trigger connection event
     setTimeout(() => {
       if (this.listeners['connection']) {
+        console.log(`[LocalSocketServer] Triggering connection event (${this.listeners['connection'].length} listeners)`);
         this.listeners['connection'].forEach(callback => {
           callback(socket);
         });
+      } else {
+        console.warn('[LocalSocketServer] Socket created but no connection listeners registered!');
       }
     }, 0);
     
@@ -95,6 +112,7 @@ class LocalSocketServer {
       this.listeners[eventName] = [];
     }
     this.listeners[eventName].push(callback);
+    console.log(`[LocalSocketServer] Registered server listener for '${eventName}'`);
   }
 
   // Emit to all connected sockets
@@ -111,7 +129,9 @@ class LocalSocketServer {
 
   // Remove socket
   removeSocket(id) {
+    console.log(`[LocalSocketServer] Removing socket: ${id}`);
     delete this.sockets[id];
+    console.log('[LocalSocketServer] Total sockets:', Object.keys(this.sockets).length);
   }
 }
 

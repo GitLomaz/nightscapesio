@@ -17,7 +17,7 @@
 // const CollectableSpawner = require("./classes/CollectableSpawner.js");
 let portals = [];
 let receptacles = [];
-let NPCs = [];
+let NPCList = [];
 let collectableSpawners = [];
 let spawnPoints = [];
 
@@ -118,15 +118,15 @@ async function loadNPCs() {
       func(moduleContext, moduleContext.exports);
       
       const mapNPCs = moduleContext.exports;
-      NPCs = NPCs.concat(mapNPCs);
+      NPCList = NPCList.concat(mapNPCs);
       console.log(`${mapNPCs.length} NPCs Loaded from ${mapName}!`);
     } catch (error) {
       console.log(`No NPCs found for ${mapName}`);
     }
   }
   
-  console.log(`Total NPCs loaded: ${NPCs.length}`);
-  return NPCs;
+  console.log(`Total NPCs loaded: ${NPCList.length}`);
+  return NPCList;
 }
 
 async function loadCollectableSpawners() {
@@ -167,7 +167,7 @@ async function loadCollectableSpawners() {
 // });
 
 // const Location = require("./classes/Location.js");
-// const Library = require("./classes/util/Library.js");
+// const Library = require("./classes/util/js");
 // const Error = require("./classes/util/Error.js");
 // const Sql = require("./classes/util/Sql.js");
 // const mysql = require("mysql");
@@ -218,7 +218,7 @@ async function loadCollectableSpawners() {
 //     Math.random().toString(36).substring(2, 15) +
 //     Math.random().toString(36).substring(2, 15);
 //   const username = req.body.username;
-//   const password = hash(Library.mergeStrings(salt, req.body.password));
+//   const password = hash(mergeStrings(salt, req.body.password));
 //   conn.query(
 //     Sql.insert("account", { name: username, password: password, salt: salt }),
 //     function (err, result) {
@@ -297,7 +297,7 @@ async function loadCollectableSpawners() {
 
 //       // ARGON2: password needs to verified with .verify function
 //       const password = hash(
-//         Library.mergeStrings(result[0].salt, req.body.password)
+//         mergeStrings(result[0].salt, req.body.password)
 //       );
 //       if (password === result[0].password) {
 //         const token = login(req.body.username);
@@ -447,7 +447,7 @@ async function initializeNPCs() {
   await loadNPCs();
   
   let counter = 0;
-  NPCs.forEach(function (npc) {
+  NPCList.forEach(function (npc) {
     if (!npc.count) {
       new NPC(npc, counter);
       counter++;
@@ -492,7 +492,7 @@ console.log("========== Nightscape Running ==========");
 
 
 function serverTick() {
-// try {
+  try {
     var t0 = performance.now();
     _.each(SPAWN_POINTS, function (sp) {
       sp.tick();
@@ -508,16 +508,16 @@ function serverTick() {
     var t4 = performance.now();
     
     // COMMENTED OUT FOR NOW 3/14/2026
-    // emitDataToClient([
-    //   "players",
-    //   "enemies",
-    //   "graphics",
-    //   "NPCs",
-    //   "collectables",
-    //   "receptacles",
-    //   "notices",
-    //   "portals",
-    // ]);
+    emitDataToClient([
+      "players",
+      "enemies",
+      "graphics",
+      "NPCs",
+      "collectables",
+      "receptacles",
+      "notices",
+      "portals",
+    ]);
 
     var t1 = performance.now();
     if (t1 - t0 > 2000) {
@@ -525,37 +525,176 @@ function serverTick() {
         "Call to emit took " +
           String(t1 - t0).split(".")[0] +
           " milliseconds. " +
-          Object.keys(Library.SOCKET_LIST).length
+          Object.keys(SOCKET_LIST).length
       );
       console.log("Call to SP took " + String(t2 - t0).split(".")[0] + " ms. ");
       console.log("Call to PP took " + String(t3 - t2).split(".")[0] + " ms. ");
       console.log("Call to CS took " + String(t4 - t3).split(".")[0] + " ms. ");
       console.log("Call to EM took " + String(t1 - t4).split(".")[0] + " ms. ");
     }
-  // } catch (error) {
-  //   console.log("=== ERROR IN MAIN LOOP ===");
-  //   console.log(error.message);
-  //   console.log(error);
-  // }
+  } catch (error) {
+    console.log("=== ERROR IN MAIN LOOP ===");
+    console.log(error.message);
+    console.log(error);
+  }
 }
 
 // Main server loop
-// setInterval(serverTick, 10000);
-
-/*
+setInterval(serverTick, 100);
 
 
-io.sockets.on("connection", function (socket) {
-  console.log('[DEBUG] New socket connection attempt');
-  console.log('[DEBUG] Socket ID:', socket.id);
-  console.log('[DEBUG] Query params:', socket.handshake.query);
-  console.log('[DEBUG] Headers:', socket.handshake.headers);
+function emitDataToClient(type = []) {
+  let pack = [];
+  _.each(type, function (c) {
+    _.each(SOCKET_LIST, function (s) {
+      if (s.player.loaded) {
+        p = s.player;
+        switch (c) {
+          case "players":
+            pack = [];
+            _.each(SOCKET_LIST, function (ss) {
+              if (ss.player.loaded) {
+                if (p.location.getDistance(ss.player.location) < 30) {
+                  let playerObj = ss.player.exportObj(
+                    s.player.id === ss.player.id
+                  );
+                  playerObj.id = ss.id;
+                  pack.push(playerObj);
+                }
+              }
+            });
+            if (JSON.stringify(s.hashes["players"]) !== JSON.stringify(pack)) {
+              s.hashes["players"] = pack;
+              s.emit("playerPositions", pack);
+            }
+            break;
+          case "enemies":
+            pack = [];
+            _.each(OBJECTS.ENEMIES, function (e) {
+              if (p.location.getDistance(e.location) < 30) {
+                obj = e.exportObj();
+                pack.push(obj);
+              }
+            });
+            if (JSON.stringify(s.hashes["enemies"]) !== JSON.stringify(pack)) {
+              s.hashes["enemies"] = pack;
+              s.emit("enemyPositions", pack);
+            }
+            break;
+          case "graphics":
+            pack = [];
+            _.each(GRAPHICS, function (g) {
+              if (!g.player || g.player === p.id) {
+                if (g.location && p.location.getDistance(g.location) < 30) {
+                  pack.push(g);
+                }
+              }
+            });
+            if (pack.length > 0) s.emit("graphics", pack);
+            break;
+          case "notices":
+            pack = [];
+            _.each(NOTICES, function (g) {
+              if (g.target === p.id) {
+                pack.push(g);
+              }
+            });
+            if (pack.length > 0) s.emit("notices", pack);
+            break;
+          case "NPCs":
+            pack = [];
+            _.each(OBJECTS.NPCS, function (npc) {
+              if (p.location.getDistance(npc.location) < 30) {
+                pack.push({
+                  npc: npc,
+                  punctionation: npc.getQuestPunctuation(p),
+                });
+              }
+            });
+            if (JSON.stringify(s.hashes["NPCs"]) !== JSON.stringify(pack)) {
+              s.hashes["NPCs"] = pack;
+              s.emit("NPCs", pack);
+            }
+            break;
+          case "collectables":
+            pack = [];
+            _.each(OBJECTS.COLLECTABLES, function (col) {
+              if (
+                p.location.getDistance(col.location) < 30 &&
+                (!col.collecter || col.collecter == p)
+              ) {
+                pack.push(col.exportObj());
+              }
+            });
+            if (
+              JSON.stringify(s.hashes["collectables"]) !== JSON.stringify(pack)
+            ) {
+              s.hashes["collectables"] = pack;
+              s.emit("collectables", pack);
+            }
+            break;
+          case "receptacles":
+            pack = [];
+            _.each(OBJECTS.RECEPTACLES, function (rec) {
+              if (p.location.getDistance(rec.location) < 30) {
+                ret = rec.exportObj();
+                if (rec.used(p)) {
+                  ret.used = true;
+                  ret.title = "Opened";
+                }
+                pack.push(ret);
+              }
+            });
+            if (
+              JSON.stringify(s.hashes["receptacles"]) !== JSON.stringify(pack)
+            ) {
+              s.hashes["receptacles"] = pack;
+              s.emit("receptacles", pack);
+            }
+            break;
+          case "portals":
+            pack = [];
+            _.each(OBJECTS.PORTALS, function (portal) {
+              if (p.location.getDistance(portal.location) < 30) {
+                ret = portal.exportObj();
+                pack.push(ret);
+              }
+            });
+            if (JSON.stringify(s.hashes["portals"]) !== JSON.stringify(pack)) {
+              s.hashes["portals"] = pack;
+              s.emit("portals", pack);
+            }
+            break;
+        }
+      }
+    });
+  });
+  GRAPHICS = [];
+  NOTICES = [];
+}
+
+// Setup connection handler - called after io is initialized
+function setupConnectionHandler() {
+  console.log('[Server] Setting up connection handler...');
+  console.log('[Server] io exists:', !!io);
+  console.log('[Server] io type:', typeof io);
+  
+  if (!io) {
+    console.error('[Server] ERROR: io is not initialized! Make sure SocketAdapter creates it first.');
+    return;
+  }
+  
+  io.on("connection", function (socket) {
+    console.log('[DEBUG] ========== NEW SOCKET CONNECTION ==========');
+    console.log('[DEBUG] Socket ID:', socket.id);
+    console.log('[DEBUG] Query params:', socket.handshake.query);
+    console.log('[DEBUG] Headers:', socket.handshake.headers);
   
   if (socket.handshake.query.type === "polling") {
     console.log('[DEBUG] Polling connection type');
     socket.on("pingu", function () {
       socket.emit("pongu", {
-        len: Object.keys(Library.SOCKET_LIST).length || 0,
+        len: Object.keys(SOCKET_LIST).length || 0,
       });
     });
   } else {
@@ -563,13 +702,13 @@ io.sockets.on("connection", function (socket) {
     try {
       if (socket.handshake.query.guest) {
         console.log('[DEBUG] Guest player connecting');
-        socket.id = Library.getRandomInt(-100000, 0);
+        socket.id = getRandomInt(-100000, 0);
       } else {
         console.log('[DEBUG] Regular player connecting with ID:', socket.handshake.query.id);
         socket.id = socket.handshake.query.id;
       }
       console.log('[DEBUG] Assigned socket ID:', socket.id);
-      Library.SOCKET_LIST[socket.id] = socket;
+      SOCKET_LIST[socket.id] = socket;
       console.log('[DEBUG] Creating new Player instance');
       socket.player = new Player(
         socket.id,
@@ -601,7 +740,7 @@ io.sockets.on("connection", function (socket) {
       socket.on("targetObject", function (data) {
         socket.player.targetType = data.type;
         socket.player.targetObject(
-          Library.OBJECTS[data.type.toUpperCase()][data.hash]
+          OBJECTS[data.type.toUpperCase()][data.hash]
         );
       });
 
@@ -651,11 +790,11 @@ io.sockets.on("connection", function (socket) {
             }
           }
         });
-        Library.NOTICES.push({
+        NOTICES.push({
           target: this.id,
           type: "itemGain",
           image: "itemGainIconGold",
-          string: Library.numberWithCommas(money) + " Gold ",
+          string: numberWithCommas(money) + " Gold ",
         });
       });
 
@@ -701,7 +840,7 @@ io.sockets.on("connection", function (socket) {
             Math.random().toString(36).substring(2, 15) +
             Math.random().toString(36).substring(2, 15);
           const username = data.username;
-          const password = hash(Library.mergeStrings(salt, data.password));
+          const password = hash(mergeStrings(salt, data.password));
           conn.query(
             Sql.insert("account", {
               name: username,
@@ -764,7 +903,7 @@ io.sockets.on("connection", function (socket) {
             map: socket.player.location.map,
           });
           if (loc.isWalkable()) {
-            path = Library.calculatePath(socket.player.location, loc);
+            path = calculatePath(socket.player.location, loc);
             let pathNew = [];
             if (path.length < 45 && path.length > 0) {
               _.each(path, function (e) {
@@ -841,7 +980,7 @@ io.sockets.on("connection", function (socket) {
               break;
             case "/where":
               let found = false;
-              _.each(Library.SOCKET_LIST, function (s) {
+              _.each(SOCKET_LIST, function (s) {
                 if (s.player.name === message.split(" ")[1]) {
                   found = s.player.location.readable();
                 }
@@ -854,7 +993,7 @@ io.sockets.on("connection", function (socket) {
               break;
             case "/who":
               msg.message = "Currently Online:<br/>";
-              _.each(Library.SOCKET_LIST, function (s) {
+              _.each(SOCKET_LIST, function (s) {
                 if (s.player.location) {
                   msg.message +=
                     s.player.name +
@@ -889,7 +1028,7 @@ io.sockets.on("connection", function (socket) {
             message: "CHAT: " + socket.player.name + ": " + message,
           })
         );
-        message = Library.encodeHTML(message);
+        message = encodeHTML(message);
         let tag = "";
         if (parseInt(socket.player.id) === 5) {
           tag = "adminTags";
@@ -901,7 +1040,7 @@ io.sockets.on("connection", function (socket) {
           sender: socket.player.name,
           tag: tag,
         };
-        _.each(Library.SOCKET_LIST, function (s) {
+        _.each(SOCKET_LIST, function (s) {
           s.emit("chatMessage", msg);
         });
       });
@@ -910,9 +1049,9 @@ io.sockets.on("connection", function (socket) {
         if (socket.player.loaded) {
           socket.player.save(false, true);
         }
-        delete Library.SOCKET_LIST[socket.id];
+        delete SOCKET_LIST[socket.id];
         if (socket.player.loaded) {
-          let message = Library.encodeHTML(
+          let message = encodeHTML(
             socket.player.name + " Has Disconnected."
           );
           console.log(message);
@@ -920,7 +1059,7 @@ io.sockets.on("connection", function (socket) {
             message: message,
             sender: "System",
           };
-          _.each(Library.SOCKET_LIST, function (s) {
+          _.each(SOCKET_LIST, function (s) {
             s.emit("chatMessage", msg);
           });
           conn.query(
@@ -928,12 +1067,12 @@ io.sockets.on("connection", function (socket) {
               message: socket.player.name + " Has Disconnected",
             })
           );
-          Library.GRAPHICS.push({
+          GRAPHICS.push({
             type: "hidePlayer",
             location: socket.player.location,
             tints: [0x00454a, 0x00757d, 0x008d96],
           });
-          _.each(Library.SPAWN_POINTS, function (sp) {
+          _.each(SPAWN_POINTS, function (sp) {
             if (sp.enemy && sp.enemy.target && sp.enemy.target == socket.id) {
               sp.enemy.forgetPlayer();
             }
@@ -948,137 +1087,13 @@ io.sockets.on("connection", function (socket) {
       console.log("[DEBUG] ===============================================");
     }
   }
-});
-
-function emitDataToClient(type = []) {
-  let pack = [];
-  _.each(type, function (c) {
-    _.each(Library.SOCKET_LIST, function (s) {
-      if (s.player.loaded) {
-        p = s.player;
-        switch (c) {
-          case "players":
-            pack = [];
-            _.each(Library.SOCKET_LIST, function (ss) {
-              if (ss.player.loaded) {
-                if (p.location.getDistance(ss.player.location) < 30) {
-                  let playerObj = ss.player.exportObj(
-                    s.player.id === ss.player.id
-                  );
-                  playerObj.id = ss.id;
-                  pack.push(playerObj);
-                }
-              }
-            });
-            if (JSON.stringify(s.hashes["players"]) !== JSON.stringify(pack)) {
-              s.hashes["players"] = pack;
-              s.emit("playerPositions", pack);
-            }
-            break;
-          case "enemies":
-            pack = [];
-            _.each(Library.OBJECTS.ENEMIES, function (e) {
-              if (p.location.getDistance(e.location) < 30) {
-                obj = e.exportObj();
-                pack.push(obj);
-              }
-            });
-            if (JSON.stringify(s.hashes["enemies"]) !== JSON.stringify(pack)) {
-              s.hashes["enemies"] = pack;
-              s.emit("enemyPositions", pack);
-            }
-            break;
-          case "graphics":
-            pack = [];
-            _.each(Library.GRAPHICS, function (g) {
-              if (!g.player || g.player === p.id) {
-                if (g.location && p.location.getDistance(g.location) < 30) {
-                  pack.push(g);
-                }
-              }
-            });
-            if (pack.length > 0) s.emit("graphics", pack);
-            break;
-          case "notices":
-            pack = [];
-            _.each(Library.NOTICES, function (g) {
-              if (g.target === p.id) {
-                pack.push(g);
-              }
-            });
-            if (pack.length > 0) s.emit("notices", pack);
-            break;
-          case "NPCs":
-            pack = [];
-            _.each(Library.OBJECTS.NPCS, function (npc) {
-              if (p.location.getDistance(npc.location) < 30) {
-                pack.push({
-                  npc: npc,
-                  punctionation: npc.getQuestPunctuation(p),
-                });
-              }
-            });
-            if (JSON.stringify(s.hashes["NPCs"]) !== JSON.stringify(pack)) {
-              s.hashes["NPCs"] = pack;
-              s.emit("NPCs", pack);
-            }
-            break;
-          case "collectables":
-            pack = [];
-            _.each(Library.OBJECTS.COLLECTABLES, function (col) {
-              if (
-                p.location.getDistance(col.location) < 30 &&
-                (!col.collecter || col.collecter == p)
-              ) {
-                pack.push(col.exportObj());
-              }
-            });
-            if (
-              JSON.stringify(s.hashes["collectables"]) !== JSON.stringify(pack)
-            ) {
-              s.hashes["collectables"] = pack;
-              s.emit("collectables", pack);
-            }
-            break;
-          case "receptacles":
-            pack = [];
-            _.each(Library.OBJECTS.RECEPTACLES, function (rec) {
-              if (p.location.getDistance(rec.location) < 30) {
-                ret = rec.exportObj();
-                if (rec.used(p)) {
-                  ret.used = true;
-                  ret.title = "Opened";
-                }
-                pack.push(ret);
-              }
-            });
-            if (
-              JSON.stringify(s.hashes["receptacles"]) !== JSON.stringify(pack)
-            ) {
-              s.hashes["receptacles"] = pack;
-              s.emit("receptacles", pack);
-            }
-            break;
-          case "portals":
-            pack = [];
-            _.each(Library.OBJECTS.PORTALS, function (portal) {
-              if (p.location.getDistance(portal.location) < 30) {
-                ret = portal.exportObj();
-                pack.push(ret);
-              }
-            });
-            if (JSON.stringify(s.hashes["portals"]) !== JSON.stringify(pack)) {
-              s.hashes["portals"] = pack;
-              s.emit("portals", pack);
-            }
-            break;
-        }
-      }
-    });
   });
-  Library.GRAPHICS = [];
-  Library.NOTICES = [];
+  
+  console.log('[Server] Connection handler setup complete!');
 }
+
+// Don't call setupConnectionHandler yet - wait for game.js to initialize io
+// game.js will call: setupConnectionHandler() after creating SocketAdapter
 
 function login(account) {
   const token =
@@ -1097,4 +1112,3 @@ function login(account) {
 function findPlayer(name) {
   return "Player not found";
 }
-*/

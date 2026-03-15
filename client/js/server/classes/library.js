@@ -6,6 +6,16 @@ let GRAPHICS = [];
 let SOUNDS = [];
 let OBJECTS = {};
 let NOTICES = [];
+var io; // Use 'var' so it's accessible on window object - will be set by SocketAdapter
+
+// Initialize LocalSocketServer for singleplayer mode
+// This will be set by SocketAdapter when game initializes
+
+if (typeof LocalSocketServer !== 'undefined') {
+  console.log('[Library] LocalSocketServer is available, will wait for game to initialize io');
+} else {
+  console.warn('[Library] LocalSocketServer not available - make sure LocalSocket.js is loaded first');
+}
 
 OBJECTS.PLAYERS = {};
 OBJECTS.NPCS = {};
@@ -72,13 +82,15 @@ function getDirection(loc1, loc2) {
 }
 function calculatePath(loc1, loc2) {
   try {
-    let grid = new pathfinding.Grid(Maps[loc1.map].layout);
-    let finder = new pathfinding.AStarFinder({
+    let grid = new PF.Grid(Maps[loc1.map].layout);
+    let finder = new PF.AStarFinder({
       allowDiagonal: true,
     });
     let path = finder.findPath(loc1.x, loc1.y, loc2.x, loc2.y, grid);
     return path;
   } catch (error) {
+    console.log('error')
+    console.log(error)
     return [];
   }
 }

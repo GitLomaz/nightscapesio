@@ -1,7 +1,7 @@
-$(document).ready(function () {
+function init() {
   // Configuration
-  const BASE_URL = window.location.origin;
-  const DEV_PORT = window.CONFIG?.DEV_PORT || ':2000';
+  // const BASE_URL = window.location.origin;
+  // const DEV_PORT = window.CONFIG?.DEV_PORT || ':2000';
   
   console.log('[DEBUG] Document ready, initializing socket connection');
   console.log('[DEBUG] Current URL:', window.location.href);
@@ -38,40 +38,72 @@ $(document).ready(function () {
       mode: 'local',
       id: 'singleplayer',
       token: 'local_token',
-      guest: false
+      guest: true
     });
     socket = socketAdapter.getSocket();
     
     addDebugEvent('Running in SINGLEPLAYER mode (LocalSocket)', '#0ff');
     
   } else if (window.location.href.includes("guest")) {
-    console.log('[DEBUG] Guest mode detected');
+    console.log('[DEBUG] Guest mode detected - using LocalSocket');
     mode = 'guest';
-    socket = io({ secure: true, query: "guest=1" });
-  } else if (window.location.href.includes("dev")) {
-    console.log('[DEBUG] Dev mode detected');
-    mode = 'dev';
-    socket = io(DEV_PORT, {
-      secure: true,
-      query: "token=" + token + "&id=" + char,
+    socketAdapter = new SocketAdapter({
+      mode: 'local',
+      id: 'guest',
+      token: 'guest_token',
+      guest: true
     });
+    socket = socketAdapter.getSocket();
+  } else if (window.location.href.includes("dev")) {
+    console.log('[DEBUG] Dev mode detected - using LocalSocket');
+    mode = 'dev';
+    socketAdapter = new SocketAdapter({
+      mode: 'local',
+      id: char || 'dev',
+      token: token || 'dev_token',
+      guest: false
+    });
+    socket = socketAdapter.getSocket();
   } else if (window.location.href.includes("localhost")) {
-    console.log('[DEBUG] Localhost mode detected');
+    console.log('[DEBUG] Localhost mode detected - using LocalSocket');
     mode = 'localhost';
     if (!window.location.href.includes("other")) {
       console.log('[DEBUG] Using default localhost config');
-      socket = io({ secure: true, query: "localhost=true&id=5" });
+      socketAdapter = new SocketAdapter({
+        mode: 'local',
+        id: '5',
+        token: 'localhost_token',
+        localhost: true
+      });
+      socket = socketAdapter.getSocket();
     } else {
       console.log('[DEBUG] Using alternate localhost config');
       mode = 'localhost-other';
-      socket = io({ secure: true, query: "localhost=true&id=1203" });
+      socketAdapter = new SocketAdapter({
+        mode: 'local',
+        id: '1203',
+        token: 'localhost_token',
+        localhost: true
+      });
+      socket = socketAdapter.getSocket();
     }
   } else {
-    console.log('[DEBUG] Standard mode with token and char');
-    socket = io({
-      secure: true,
-      query: "token=" + token + "&id=" + char,
+    console.log('[DEBUG] Standard mode with token and char - using LocalSocket');
+    socketAdapter = new SocketAdapter({
+      mode: 'local',
+      id: char || 'player',
+      token: token || 'default_token',
+      guest: false
     });
+    socket = socketAdapter.getSocket();
+  }
+  
+  // Setup server connection handler after io is initialized
+  if (typeof setupConnectionHandler === 'function') {
+    console.log('[DEBUG] Calling setupConnectionHandler()...');
+    setupConnectionHandler();
+  } else {
+    console.warn('[DEBUG] setupConnectionHandler not available - server may not be loaded');
   }
   
   $('#debugModeValue').text(mode);
@@ -870,7 +902,7 @@ $(document).ready(function () {
   dragElement(document.getElementById("tips"));
   dragElement(document.getElementById("skills"));
   changeBestiaryPage();
-});
+}
 
 function showMessage(text, color = "red") {
   window.clearTimeout(registerMessageTimeout);
@@ -1221,3 +1253,7 @@ function refreshScene() {
   gameSceneObj.music.stop();
   gameSceneObj.scene.start("gameScene");
 }
+
+$(document).ready(function () {
+  init()
+});

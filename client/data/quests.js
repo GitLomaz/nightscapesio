@@ -1038,4 +1038,3 @@ let quests = [
     },
   },
 ];
-module.exports = quests;

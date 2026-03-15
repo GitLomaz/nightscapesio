@@ -37,29 +37,33 @@ class Receptacle {
         if (that.gold && that.gold.chance > getRandomInt(0, 100)) {
           gold = getRandomInt(that.gold.min, that.gold.max);
         }
-        that.drops.forEach((drop) => {
-          let chance = drop.chance;
-          if (chance > getRandomInt(0, 100)) {
-            player.items[drop.item].increase(drop.quantity);
-          }
-        });
-        that.equipmentDrops.forEach((drop) => {
-          let chance = drop.chance;
-          if (chance > getRandomInt(0, 100)) {
-            const e = new Equipment(Equipments[drop.item], player.id, "basic");
-            player.equipment.push(e);
-            NOTICES.push({
-              target: player.id,
-              type: "itemGain",
-              image:
-                e.slot !== "weapon"
-                  ? "itemGainIconArmor"
-                  : "itemGainIconWeapon",
-              string: colorDrop(e.name, e.type),
-            });
-            e.removeTemplate();
-          }
-        });
+        if (that.drops && that.drops.length > 0) {
+          that.drops.forEach((drop) => {
+            let chance = drop.chance;
+            if (chance > getRandomInt(0, 100)) {
+              player.items[drop.item].increase(drop.quantity);
+            }
+          });
+        }
+        if (that.equipmentDrops && that.equipmentDrops.length > 0) {
+          that.equipmentDrops.forEach((drop) => {
+            let chance = drop.chance;
+            if (chance > getRandomInt(0, 100)) {
+              const e = new Equipment(Equipments[drop.item], player.id, "basic");
+              player.equipment.push(e);
+              NOTICES.push({
+                target: player.id,
+                type: "itemGain",
+                image:
+                  e.slot !== "weapon"
+                    ? "itemGainIconArmor"
+                    : "itemGainIconWeapon",
+                string: colorDrop(e.name, e.type),
+              });
+              e.removeTemplate();
+            }
+          });
+        }
         player.gainGold(gold);
         that.userList.push(player.id);
         GRAPHICS.push({

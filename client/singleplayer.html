@@ -9,13 +9,23 @@
       }
     </script>
     <script type="text/javascript" src="./js/libs/jquery.js"></script>
+    <script type="text/javascript" src="./js/libs/phaser3.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.23/lodash.min.js"></script>
     <link rel="stylesheet" href="./css/main.css" />
     <!-- Local Socket for Singleplayer -->
     <script type="text/javascript" src="./js/LocalSocket.js"></script>
     <script type="text/javascript" src="./js/SocketAdapter.js"></script>
     <!-- Uncomment for multiplayer: <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script> -->
-    <script src=" https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js "></script>
+    <script type="module">
+      import PF from "https://esm.sh/pathfinding@0.4.18";
+      window.PF = PF;
+
+      const grid = new PF.Grid(10, 10);
+      const finder = new PF.AStarFinder();
+      console.log(finder.findPath(0, 0, 5, 5, grid));
+    </script>
     <script src=" https://cdn.jsdelivr.net/npm/object-hash@3.0.0/dist/object_hash.min.js "></script>
+    <script type="text/javascript" src="./data/affixes.js"></script>
     <script type="text/javascript" src="./data/images.js"></script>
     <script type="text/javascript" src="./data/cache.js"></script>
     <script type="text/javascript" src="./data/skills.js"></script>
@@ -26,6 +36,9 @@
     <script type="text/javascript" src="./data/equipmentClass.js"></script>
     <script type="text/javascript" src="./data/collectables.js"></script>
     <script type="text/javascript" src="./data/statusEffects.js"></script>
+    <script type="text/javascript" src="./data/animals.js"></script>
+    <script type="text/javascript" src="./data/levels.js"></script>
+    <script type="text/javascript" src="./data/quests.js"></script>
     <script type="text/javascript" src="./js/server/classes/maps.js"></script>
     <script type="text/javascript" src="./js/server/classes/library.js"></script>
     <script type="text/javascript" src="./js/server/classes/location.js"></script>
@@ -37,10 +50,19 @@
     <script type="text/javascript" src="./js/server/classes/NPC.js"></script>
     <script type="text/javascript" src="./js/server/classes/equipment.js"></script>
     <script type="text/javascript" src="./js/server/classes/enemy.js"></script>
+    <script type="text/javascript" src="./js/server/classes/quest.js"></script>
+    <script type="text/javascript" src="./js/server/classes/statusEffect.js"></script>
+    <script type="text/javascript" src="./js/server/classes/item.js"></script>
+    <script type="text/javascript" src="./js/server/classes/skill.js"></script>
+    <script type="text/javascript" src="./js/server/classes/kill.js"></script>
+    <!-- LocalStorage Database System (replaces MySQL) -->
+    <script type="text/javascript" src="./js/server/classes/LocalStorageDB.js"></script>
+    <script type="text/javascript" src="./js/server/classes/Sql.js"></script>
+    <script type="text/javascript" src="./js/server/classes/CharacterManager.js"></script>
+    <script type="text/javascript" src="./js/server/classes/browser-helpers.js"></script>
+    <script type="text/javascript" src="./js/server/classes/player.js"></script>
     <script type="text/javascript" src="./js/server/main.js"></script>
     <script type="text/javascript" src="./js/config.js"></script>
-    <script type="text/javascript" src="./js/libs/phaser3.js"></script>
-    <script type="text/javascript" src="./js/libs/lodash.js"></script>
     <script type="text/javascript" src="./js/soundController.js"></script>
     <script type="text/javascript" src="./js/globals.js"></script>
     <script type="text/javascript" src="./js/sockets.js"></script>
@@ -54,7 +76,7 @@
   </head>
   <body oncontextmenu="return false;" style="margin: 0">
     <!-- Debug Panel -->
-    <div id="debugPanel" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 99999; max-width: 400px; border: 2px solid #0f0;">
+    <div id="debugPanel" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 99999; max-width: 400px; border: 2px solid #0f0;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <div style="color: #fff; font-weight: bold;">🔧 DEBUG INFO 🔧</div>
         <button id="debugToggle" style="background: #333; color: #0f0; border: 1px solid #0f0; cursor: pointer; padding: 2px 8px;">Hide</button>

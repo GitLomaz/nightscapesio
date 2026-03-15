@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalStorage Character Manager - Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #eee;
+    }
+    h1 { color: #4CAF50; }
+    h2 { color: #2196F3; border-bottom: 2px solid #2196F3; padding-bottom: 5px; }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .section {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #444;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #da190b;
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #555;
+      border-radius: 3px;
+      background: #333;
+      color: #eee;
+    }
+    .output {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 3px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .character-list {
+      list-style: none;
+      padding: 0;
+    }
+    .character-item {
+      background: #333;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 3px;
+      border-left: 3px solid #4CAF50;
+    }
+    .stat {
+      display: inline-block;
+      margin-right: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Nightscapes LocalStorage Character Manager</h1>
+  <p>Test and manage characters using browser localStorage (no MySQL required)</p>
+
+  <div class="container">
+    <!-- Create Character Section -->
+    <div class="section">
+      <h2>Create New Character</h2>
+      <div>
+        <label>Name: <input type="text" id="charName" placeholder="Hero Name"></label><br>
+        <label>Class: 
+          <select id="charClass">
+            <option>Knight</option>
+            <option>Warrior</option>
+            <option>Mage</option>
+            <option>Ranger</option>
+            <option>Rogue</option>
+          </select>
+        </label><br>
+        <label>Strength: <input type="number" id="charStr" value="1" min="1" max="100"></label><br>
+        <label>Vitality: <input type="number" id="charVit" value="1" min="1" max="100"></label><br>
+        <label>Intelligence: <input type="number" id="charInt" value="1" min="1" max="100"></label><br>
+        <label>Agility: <input type="number" id="charAgi" value="1" min="1" max="100"></label><br>
+        <label>Dexterity: <input type="number" id="charDex" value="1" min="1" max="100"></label><br>
+        <button onclick="createCharacter()">Create Character</button>
+      </div>
+      <div class="output" id="createOutput"></div>
+    </div>
+
+    <!-- View Characters Section -->
+    <div class="section">
+      <h2>All Characters</h2>
+      <button onclick="loadCharacters()">Refresh List</button>
+      <ul class="character-list" id="characterList"></ul>
+    </div>
+
+    <!-- Update Character Section -->
+    <div class="section">
+      <h2>Update Character</h2>
+      <div>
+        <label>Character ID: <input type="number" id="updateId" placeholder="1"></label><br>
+        <label>Level: <input type="number" id="updateLevel" placeholder="5"></label><br>
+        <label>Gold: <input type="number" id="updateGold" placeholder="1000"></label><br>
+        <label>Experience: <input type="number" id="updateExp" placeholder="500"></label><br>
+        <button onclick="updateCharacter()">Update Character</button>
+      </div>
+      <div class="output" id="updateOutput"></div>
+    </div>
+
+    <!-- Add Items Section -->
+    <div class="section">
+      <h2>Add Item/Equipment</h2>
+      <div>
+        <label>Character ID: <input type="number" id="itemCharId" placeholder="1"></label><br>
+        <label>Item ID: <input type="number" id="itemId" placeholder="101"></label><br>
+        <label>Quantity: <input type="number" id="itemQty" placeholder="5"></label><br>
+        <button onclick="addItem()">Add Item</button>
+      </div>
+      <div class="output" id="itemOutput"></div>
+    </div>
+
+    <!-- Database Operations Section -->
+    <div class="section">
+      <h2>Database Operations</h2>
+      <button onclick="exportData()">Export All Data</button>
+      <button onclick="viewRawData()">View Raw Storage</button>
+      <button class="danger" onclick="clearAllData()">Clear All Data</button>
+      <div class="output" id="dbOutput"></div>
+    </div>
+
+    <!-- Query Test Section -->
+    <div class="section">
+      <h2>SQL Query Test</h2>
+      <div>
+        <textarea id="sqlQuery" style="width: 100%; height: 60px; background: #333; color: #eee; border: 1px solid #555; padding: 8px;" placeholder="SELECT * FROM character WHERE id = '1'"></textarea><br>
+        <button onclick="executeQuery()">Execute Query</button>
+      </div>
+      <div class="output" id="queryOutput"></div>
+    </div>
+  </div>
+
+  <!-- Load the LocalStorage classes -->
+  <script src="LocalStorageDB.js"></script>
+  <script src="CharacterManager.js"></script>
+
+  <script>
+    const manager = new CharacterManager();
+
+    function createCharacter() {
+      const name = document.getElementById('charName').value || 'Hero';
+      const charClass = document.getElementById('charClass').value;
+      const strength = parseInt(document.getElementById('charStr').value) || 1;
+      const vitality = parseInt(document.getElementById('charVit').value) || 1;
+      const intelligence = parseInt(document.getElementById('charInt').value) || 1;
+      const agility = parseInt(document.getElementById('charAgi').value) || 1;
+      const dexterity = parseInt(document.getElementById('charDex').value) || 1;
+
+      if (!manager.isNameAvailable(name)) {
+        document.getElementById('createOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: Name already taken!</span>';
+        return;
+      }
+
+      const character = manager.createCharacter({
+        name: name,
+        class: charClass,
+        strength: strength,
+        vitality: vitality,
+        intelligence: intelligence,
+        agility: agility,
+        dexterity: dexterity
+      });
+
+      document.getElementById('createOutput').innerHTML = 
+        '<span style="color: #4CAF50;">✓ Character created!</span><br>' +
+        '<pre>' + JSON.stringify(character, null, 2) + '</pre>';
+      
+      loadCharacters(); // Refresh the list
+    }
+
+    function loadCharacters() {
+      const characters = manager.getAllCharacters();
+      const list = document.getElementById('characterList');
+      
+      if (characters.length === 0) {
+        list.innerHTML = '<li style="color: #999;">No characters yet. Create one!</li>';
+        return;
+      }
+
+      list.innerHTML = characters.map(char => `
+        <li class="character-item">
+          <strong>${char.name}</strong> (ID: ${char.id})
+          <div style="margin-top: 5px; font-size: 12px;">
+            <span class="stat">Class: ${char.class}</span>
+            <span class="stat">Level: ${char.level}</span>
+            <span class="stat">Gold: ${char.gold}</span>
+          </div>
+          <div style="margin-top: 5px; font-size: 11px; color: #aaa;">
+            <span class="stat">STR: ${char.strength}</span>
+            <span class="stat">VIT: ${char.vitality}</span>
+            <span class="stat">INT: ${char.intelligence}</span>
+            <span class="stat">AGI: ${char.agility}</span>
+            <span class="stat">DEX: ${char.dexterity}</span>
+          </div>
+          <button onclick="deleteCharacter(${char.id})" class="danger" style="font-size: 11px; padding: 5px 10px;">Delete</button>
+        </li>
+      `).join('');
+    }
+
+    function updateCharacter() {
+      const id = parseInt(document.getElementById('updateId').value);
+      const level = parseInt(document.getElementById('updateLevel').value);
+      const gold = parseInt(document.getElementById('updateGold').value);
+      const exp = parseInt(document.getElementById('updateExp').value);
+
+      if (!id) {
+        document.getElementById('updateOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: Enter character ID</span>';
+        return;
+      }
+
+      const updateData = {};
+      if (level) updateData.level = level;
+      if (gold) updateData.gold = gold;
+      if (exp) updateData.exp = exp;
+
+      const success = manager.updateCharacter(id, updateData);
+      
+      if (success) {
+        const char = manager.getCharacter(id);
+        document.getElementById('updateOutput').innerHTML = 
+          '<span style="color: #4CAF50;">✓ Character updated!</span><br>' +
+          '<pre>' + JSON.stringify(char, null, 2) + '</pre>';
+        loadCharacters();
+      } else {
+        document.getElementById('updateOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: Character not found</span>';
+      }
+    }
+
+    function addItem() {
+      const charId = parseInt(document.getElementById('itemCharId').value);
+      const itemId = parseInt(document.getElementById('itemId').value);
+      const qty = parseInt(document.getElementById('itemQty').value);
+
+      if (!charId || !itemId || !qty) {
+        document.getElementById('itemOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: Fill all fields</span>';
+        return;
+      }
+
+      const result = manager.addItem(charId, itemId, qty);
+      document.getElementById('itemOutput').innerHTML = 
+        '<span style="color: #4CAF50;">✓ Item added!</span><br>' +
+        '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+    }
+
+    function deleteCharacter(id) {
+      if (confirm(`Delete character ID ${id}?`)) {
+        manager.deleteCharacter(id);
+        loadCharacters();
+      }
+    }
+
+    function exportData() {
+      const data = manager.db.exportData();
+      const json = JSON.stringify(data, null, 2);
+      
+      // Create downloadable file
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'nightscape_backup_' + Date.now() + '.json';
+      a.click();
+      
+      document.getElementById('dbOutput').innerHTML = 
+        '<span style="color: #4CAF50;">✓ Data exported! Check downloads.</span><br>' +
+        '<pre style="max-height: 200px; overflow: auto;">' + json + '</pre>';
+    }
+
+    function viewRawData() {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('nightscape_'));
+      let html = '<h3>LocalStorage Contents:</h3>';
+      
+      keys.forEach(key => {
+        const value = localStorage.getItem(key);
+        html += `<div style="margin: 10px 0;"><strong>${key}:</strong><br>`;
+        html += `<pre style="background: #1a1a1a; padding: 5px;">${value}</pre></div>`;
+      });
+      
+      document.getElementById('dbOutput').innerHTML = html || '<span style="color: #999;">No data in localStorage</span>';
+    }
+
+    function clearAllData() {
+      if (confirm('⚠️ This will delete ALL character data! Are you sure?')) {
+        manager.db.clearAll();
+        document.getElementById('dbOutput').innerHTML = 
+          '<span style="color: #f44336;">✓ All data cleared!</span>';
+        loadCharacters();
+      }
+    }
+
+    function executeQuery() {
+      const query = document.getElementById('sqlQuery').value;
+      
+      if (!query) {
+        document.getElementById('queryOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: Enter a query</span>';
+        return;
+      }
+
+      try {
+        manager.db.query(query, (error, result) => {
+          if (error) {
+            document.getElementById('queryOutput').innerHTML = 
+              '<span style="color: #f44336;">Error: ' + error.message + '</span>';
+          } else {
+            document.getElementById('queryOutput').innerHTML = 
+              '<span style="color: #4CAF50;">✓ Query executed!</span><br>' +
+              '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+          }
+        });
+      } catch (e) {
+        document.getElementById('queryOutput').innerHTML = 
+          '<span style="color: #f44336;">Error: ' + e.message + '</span>';
+      }
+    }
+
+    // Load characters on page load
+    window.onload = function() {
+      loadCharacters();
+      document.getElementById('sqlQuery').value = "SELECT * FROM character WHERE id = '1'";
+    };
+  </script>
+</body>
+</html>

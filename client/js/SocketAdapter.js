@@ -6,6 +6,8 @@ class SocketAdapter {
     this.mode = config.mode || 'local'; // 'local' or 'multiplayer'
     this.socket = null;
     this.server = null;
+    console.log('[SocketAdapter] Initializing with config:', config);
+    console.log('[SocketAdapter] Mode:', this.mode);
     
     if (this.mode === 'local') {
       this.initializeLocal(config);
@@ -15,19 +17,41 @@ class SocketAdapter {
   }
 
   initializeLocal(config) {
-    // Create local socket server for singleplayer
-    this.server = new LocalSocketServer();
+    console.log('[SocketAdapter] Starting local initialization...');
+    
+    // Use existing global io server or create new one
+    if (typeof window !== 'undefined' && window.io && window.io instanceof LocalSocketServer) {
+      console.log('[SocketAdapter] Using existing global io server');
+      this.server = window.io;
+    } else {
+      console.log('[SocketAdapter] Creating new LocalSocketServer');
+      this.server = new LocalSocketServer();
+      // Expose globally so main.js can use it
+      if (typeof window !== 'undefined') {
+        window.io = this.server;
+        // Also set in global scope if io variable exists
+        if (typeof io !== 'undefined') {
+          io = this.server;
+        }
+        console.log('[SocketAdapter] Exposed server as window.io and global io');
+      }
+    }
     
     // Create the main player socket
-    this.socket = this.server.createSocket({
+    const socketQuery = {
       id: config.id || 'singleplayer',
       token: config.token || 'local_token',
       localhost: true,
       guest: config.guest || false,
       type: 'game'
-    });
+    };
+    console.log('[SocketAdapter] Creating socket with query:', socketQuery);
+    this.socket = this.server.createSocket(socketQuery);
     
-    console.log('[LocalSocket] Initialized in singleplayer mode');
+    console.log('[SocketAdapter] ✅ Local mode initialized');
+    console.log('[SocketAdapter] Socket ID:', this.socket.id);
+    console.log('[SocketAdapter] Server available:', !!this.server);
+    console.log('[SocketAdapter] Server has connection listeners:', this.server.listeners['connection']?.length || 0);
   }
 
   initializeMultiplayer(config) {
@@ -53,10 +77,13 @@ class SocketAdapter {
 
   // Proxy methods to underlying socket
   on(eventName, callback) {
+    console.log(`[SocketAdapter] Registering listener for '${eventName}'`);
     return this.socket.on(eventName, callback);
   }
 
   emit(eventName, data) {
+    const dataPreview = data !== undefined ? (typeof data === 'object' ? JSON.stringify(data).substring(0, 50) : data) : 'no data';
+    console.log(`[SocketAdapter] Emitting '${eventName}' - ${dataPreview}`);
     return this.socket.emit(eventName, data);
   }
 
