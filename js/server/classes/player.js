@@ -85,6 +85,9 @@ class Player {
     });
     this.LoadKills();
 
+    this.openedReceptacles = [];
+    this.LoadOpenedReceptacles();
+
     // flag set if localhost
     this.local = local;
   }
@@ -373,6 +376,25 @@ class Player {
     });
   }
 
+  LoadOpenedReceptacles() {
+    let that = this;
+    if (!that.id) {
+      return;
+    }
+    conn.query(
+      Sql.select("character_receptacles", { character_id: this.id }),
+      function (error, result) {
+        if (error) {
+          console.log(error);
+        } else {
+          _.each(result, function (rec) {
+            that.openedReceptacles.push(rec.receptacle_hash);
+          });
+        }
+      }
+    );
+  }
+
   save(respawn = true, force = false) {
     if (respawn) {
       this.respawn();
@@ -470,6 +492,13 @@ class Player {
           };
           conn.query(Sql.upsert("character_skill", itemObj));
         }
+      });
+      _.each(that.openedReceptacles, function (receptacleHash) {
+        const recObj = {
+          character_id: that.id,
+          receptacle_hash: receptacleHash,
+        };
+        conn.query(Sql.upsert("character_receptacles", recObj));
       });
     }
   }

@@ -13,7 +13,7 @@ class Receptacle {
   }
 
   used(player) {
-    return this.userList.includes(player.id);
+    return this.userList.includes(player.id) || player.openedReceptacles.includes(this.hash);
   }
 
   exportObj() {
@@ -66,6 +66,10 @@ class Receptacle {
         }
         player.gainGold(gold);
         that.userList.push(player.id);
+        if (!player.openedReceptacles.includes(that.hash)) {
+          player.openedReceptacles.push(that.hash);
+          player.save(false, true);
+        }
         GRAPHICS.push({
           type: "spawn",
           location: that.location,
