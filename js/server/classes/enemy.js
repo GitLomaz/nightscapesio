@@ -407,20 +407,22 @@ class Enemy {
             player.quests[drop.questId].requirements[
               player.quests[drop.questId].step
             ].collect;
-          reqirements.forEach(function (req) {
-            if (
-              req.id === drop.item &&
-              player.items[req.id].quantity < (req.count || 0)
-            ) {
-              let chance = drop.chance * (enemy.dropRate || 1);
-              if (closePlayers.length > 1) {
-                chance = chance * (1 / closePlayers.length) * 1.3;
+          if (reqirements && reqirements.length > 0) {
+            reqirements.forEach(function (req) {
+              if (
+                req.id === drop.item &&
+                player.items[req.id].quantity < (req.count || 0)
+              ) {
+                let chance = drop.chance * (enemy.dropRate || 1);
+                if (closePlayers.length > 1) {
+                  chance = chance * (1 / closePlayers.length) * 1.3;
+                }
+                if (chance > getRandomInt(0, 10000)) {
+                  player.items[drop.item].increase();
+                }
               }
-              if (chance > getRandomInt(0, 10000)) {
-                player.items[drop.item].increase();
-              }
-            }
-          });
+            });
+          }
         }
       });
 

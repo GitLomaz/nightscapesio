@@ -39,14 +39,12 @@ class NPC {
   }
 
   getFirstValidQuestId(player) {
-    let ret = false;
-    this.questIds.forEach((questId) => {
+    for (const questId of this.questIds) {
       if (player.quests[questId].status !== 2) {
-        ret = questId;
-        return false;
+        return questId;
       }
-    });
-    return ret;
+    }
+    return false;
   }
 
   talk(player) {

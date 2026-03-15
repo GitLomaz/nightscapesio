@@ -1,15 +1,15 @@
-let NPCs = [];
-_.each(Maps, function (map) {
-  try {
-    mapNPCs = require("../../client/data/maps/" + map.map + "/npcs.js");
-    NPCs = NPCs.concat(mapNPCs);
-  } catch (error) {}
-});
-let sortedNPCs = [];
-_.each(NPCs, function (npc) {
-  sortedNPCs[npc.id] = npc;
-});
-NPCs = sortedNPCs;
+// let NPCs = [];
+// _.each(Maps, function (map) {
+//   try {
+//     mapNPCs = require("../../client/data/maps/" + map.map + "/npcs.js");
+//     NPCs = NPCs.concat(mapNPCs);
+//   } catch (error) {}
+// });
+// let sortedNPCs = [];
+// _.each(NPCs, function (npc) {
+//   sortedNPCs[npc.id] = npc;
+// });
+// NPCs = sortedNPCs;
 
 class Quest {
   // status:
@@ -67,14 +67,14 @@ class Quest {
     _.each(currentStep.talk, function (k) {
       ret.requirements.push({
         type: "talk",
-        name: NPCs[k.id].name,
+        name: NPCList[k.id].name,
         progress: k.progress || 0,
       });
     });
     _.each(currentStep.return, function (k) {
       ret.requirements.push({
         type: "return",
-        name: NPCs[k.id].name,
+        name: NPCList[k.id].name,
         progress: k.progress || 0,
       });
     });
