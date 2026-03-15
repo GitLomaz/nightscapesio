@@ -2,12 +2,18 @@
 // Generates SQL-like strings that LocalStorageDB can parse
 
 const Sql = {
+  // Helper to escape single quotes in values
+  escape: function(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).replace(/'/g, "''");
+  },
+  
   insert: function (table, obj) {
     let cols = "";
     let vals = "";
     for (const prop in obj) {
       cols += "`" + prop + "`,";
-      vals += "'" + obj[prop] + "',";
+      vals += "'" + this.escape(obj[prop]) + "',";
     }
     qb =
       "INSERT INTO `" +
@@ -22,7 +28,7 @@ const Sql = {
   select: function (table, where) {
     let w = " WHERE ";
     for (const prop in where) {
-      w += "`" + prop + "` = '" + where[prop] + "' AND ";
+      w += "`" + prop + "` = '" + this.escape(where[prop]) + "' AND ";
     }
     qb = "SELECT * FROM  `" + table + "` " + w.slice(0, -4);
     return qb;
@@ -33,8 +39,8 @@ const Sql = {
     let update = "";
     for (const prop in obj) {
       cols += "`" + prop + "`,";
-      vals += "'" + obj[prop] + "',";
-      update += "`" + prop + "` = '" + obj[prop] + "',";
+      vals += "'" + this.escape(obj[prop]) + "',";
+      update += "`" + prop + "` = '" + this.escape(obj[prop]) + "',";
     }
     qb =
       "INSERT INTO `" +
@@ -50,11 +56,11 @@ const Sql = {
   update: function (table, update, where) {
     let u = "";
     for (const prop in update) {
-      u += "`" + prop + "` = '" + update[prop] + "',";
+      u += "`" + prop + "` = '" + this.escape(update[prop]) + "',";
     }
     let w = "";
     for (const prop in where) {
-      w += "`" + prop + "` = '" + where[prop] + "' AND ";
+      w += "`" + prop + "` = '" + this.escape(where[prop]) + "' AND ";
     }
     qb =
       "UPDATE `" +

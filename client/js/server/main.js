@@ -700,13 +700,8 @@ function setupConnectionHandler() {
   } else {
     console.log('[DEBUG] Regular game connection');
     try {
-      if (socket.handshake.query.guest) {
-        console.log('[DEBUG] Guest player connecting');
-        socket.id = getRandomInt(-100000, 0);
-      } else {
-        console.log('[DEBUG] Regular player connecting with ID:', socket.handshake.query.id);
-        socket.id = socket.handshake.query.id;
-      }
+      console.log('[DEBUG] Player connecting with ID:', socket.handshake.query.id);
+      socket.id = socket.handshake.query.id;
       console.log('[DEBUG] Assigned socket ID:', socket.id);
       SOCKET_LIST[socket.id] = socket;
       console.log('[DEBUG] Creating new Player instance');
@@ -714,7 +709,7 @@ function setupConnectionHandler() {
         socket.id,
         socket.handshake.query.token,
         socket.handshake.query.localhost,
-        socket.handshake.query.guest
+        false // No more guest mode
       );
       socket.hashes = [];
       console.log('[DEBUG] Calling createOrLoadPlayer()');

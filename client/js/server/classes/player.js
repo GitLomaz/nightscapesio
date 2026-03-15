@@ -185,45 +185,38 @@ class Player {
     if (!that.id) {
       return;
     }
-    let query = "";
-    if (that.guest) {
-      query = "SELECT *, 0 as tester FROM `character` where id = -1";
-    } else {
-      // For localStorage, we don't need account table joins
-      query = "SELECT *, 0 as tester FROM `character` WHERE id = " + that.id;
-    }
-    conn.query(query, function (error, result, fields) {
-      console.log("=============== Loading player with query: " + query);
-      console.log("=============== Result: " + JSON.stringify(result));
+    // Load character from localStorage
+    let query = "SELECT *, 0 as tester FROM `character` WHERE id = " + that.id;
+    conn.query(query, function (error, result) {
       if (error) {
         console.log(error);
       } else {
         if (result.length !== 0) {
           that.location = new Location({
-            x: result[0].x,
-            y: result[0].y,
+            x: parseInt(result[0].x),
+            y: parseInt(result[0].y),
             map: result[0].map,
           });
-          that.tester = result[0].tester || 0;
-          that.health = result[0].health;
-          that.mana = result[0].mana;
-          that.exp = result[0].exp;
-          that.level = result[0].level;
+          that.tester = parseInt(result[0].tester) || 0;
+          that.health = parseInt(result[0].health);
+          that.mana = parseInt(result[0].mana);
+          that.exp = parseInt(result[0].exp);
+          that.level = parseInt(result[0].level);
           that.expMax = levels[result[0].level];
           that.loaded = true;
           that.name = result[0].name;
-          that.gold = result[0].gold;
+          that.gold = parseInt(result[0].gold);
           that.class = result[0].class;
           that.combatItems = JSON.parse(result[0].combatItems);
           that.combatSkills = JSON.parse(result[0].combatSkills);
           that.stats = {
-            strength: result[0].strength,
-            vitality: result[0].vitality,
-            agility: result[0].agility,
-            dexterity: result[0].dexterity,
-            intelligence: result[0].intelligence,
-            points: result[0].points,
-            skillPoints: result[0].skillPoints,
+            strength: parseInt(result[0].strength),
+            vitality: parseInt(result[0].vitality),
+            agility: parseInt(result[0].agility),
+            dexterity: parseInt(result[0].dexterity),
+            intelligence: parseInt(result[0].intelligence),
+            points: parseInt(result[0].points),
+            skillPoints: parseInt(result[0].skillPoints),
           };
           let SE = JSON.parse(result[0].statusEffects);
           const now = new Date();
@@ -239,10 +232,6 @@ class Player {
             );
           });
           that.setStatusEffectStats();
-          if (that.guest) {
-            shuffleArray(animals);
-            that.name = "Guest " + animals[0];
-          }
           that.calculateStats();
           that.generateQuestStrings();
           let message = encodeHTML(that.name + " Has Connected.");
@@ -331,7 +320,7 @@ class Player {
     }
     let query =
       "SELECT * FROM `character_item` WHERE quantity > 0 and character_id = " +
-      (this.guest ? -1 : this.id);
+      this.id;
     conn.query(query, function (error, result) {
       if (error) {
         console.log(error);
@@ -352,7 +341,7 @@ class Player {
     }
     let query =
       "SELECT * FROM `character_skill` WHERE character_id = " +
-      (this.guest ? -1 : this.id);
+      this.id;
     conn.query(query, function (error, result) {
       if (error) {
         console.log(error);
@@ -393,7 +382,7 @@ class Player {
     }
     this.ticksSinceSave = 0;
     let that = this;
-    if (that.loaded && !that.guest) {
+    if (that.loaded) {
       let statusEffects = [];
       _.each(that.statusEffects, function (effect) {
         if (effect) {
@@ -878,15 +867,13 @@ class Player {
       this.equipment = this.equipment.filter((obj) => {
         return obj.id !== id;
       });
-      if (!this.guest) {
-        conn.query(
-          "DELETE from character_equipment where character_id = " +
-            this.id +
-            " AND item_id = " +
-            id
-        );
-        this.save(false, true); // Save immediately when selling equipment
-      }
+      conn.query(
+        "DELETE from character_equipment where character_id = " +
+          this.id +
+          " AND item_id = " +
+          id
+      );
+      this.save(false, true); // Save immediately when selling equipment
       return ret;
     }
   }
@@ -1108,7 +1095,6 @@ class Player {
       buffBonuses: this.statusEffectStats,
       kills: kills,
       skills: skills,
-      guest: this.guest,
       tester: this.tester,
       image: image,
       tag: tag,

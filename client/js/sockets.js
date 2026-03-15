@@ -71,11 +71,6 @@ function addGameSockets() {
       }
 
       if (player.id === p.id) {
-        if (p.guest) {
-          $("#guestWarning").show();
-        } else {
-          $("#guestWarning").hide();
-        }
         if (player.zone !== p.location.map) {
           if (player.zone) {
             // Zone change, re-start scene?

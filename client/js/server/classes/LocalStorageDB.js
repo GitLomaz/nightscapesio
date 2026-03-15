@@ -255,9 +255,21 @@ class LocalStorageDB {
       // Simple WHERE parsing (handles basic conditions)
       const parts = conditions.split(/\s+AND\s+/i);
       parts.forEach(part => {
-        const match = part.match(/`?(\w+)`?\s*=\s*'?([^']+)'?/);
+        const match = part.match(/`?(\w+)`?\s*=\s*'(.+)'/);
         if (match) {
-          where[match[1]] = match[2].replace(/'/g, '');
+          let value = match[2].replace(/''/g, "'");
+          // Try to parse as number if it looks like one
+          if (/^-?\d+$/.test(value)) {
+            value = parseInt(value);
+          } else if (/^-?\d+\.\d+$/.test(value)) {
+            value = parseFloat(value);
+          }
+          where[match[1]] = value;
+        } else {
+          const match2 = part.match(/`?(\w+)`?\s*=\s*(\d+)/);
+          if (match2) {
+            where[match2[1]] = parseInt(match2[2]);
+          }
         }
       });
     }
@@ -275,16 +287,43 @@ class LocalStorageDB {
     // Check if it's an UPSERT
     const isUpsert = sql.toUpperCase().includes('ON DUPLICATE KEY UPDATE');
     
-    // Extract columns and values
-    const colMatch = sql.match(/\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i);
+    // Extract columns and values - handle quoted values properly
+    const colMatch = sql.match(/\(([^)]+)\)\s*VALUES\s*\((.+)\)(?:\s+ON|$)/i);
     if (!colMatch) return [];
     
     const columns = colMatch[1].split(',').map(c => c.trim().replace(/`/g, ''));
-    const values = colMatch[2].split(',').map(v => v.trim().replace(/'/g, ''));
+    
+    // Parse values handling quoted strings with embedded commas
+    const valuesStr = colMatch[2];
+    const values = [];
+    let current = '';
+    let inQuote = false;
+    
+    for (let i = 0; i < valuesStr.length; i++) {
+      const char = valuesStr[i];
+      if (char === "'" && (i === 0 || valuesStr[i-1] !== "'")) {
+        inQuote = !inQuote;
+      } else if (char === ',' && !inQuote) {
+        values.push(current.trim().replace(/^'|'$/g, '').replace(/''/g, "'"));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current) {
+      values.push(current.trim().replace(/^'|'$/g, '').replace(/''/g, "'"));
+    }
     
     const data = {};
     columns.forEach((col, i) => {
-      data[col] = values[i];
+      let value = values[i];
+      // Try to parse as number if it looks like one
+      if (/^-?\d+$/.test(value)) {
+        value = parseInt(value);
+      } else if (/^-?\d+\.\d+$/.test(value)) {
+        value = parseFloat(value);
+      }
+      data[col] = value;
     });
     
     if (isUpsert) {
@@ -306,11 +345,39 @@ class LocalStorageDB {
     if (!setMatch) return [];
     
     const updateData = {};
-    const setParts = setMatch[1].split(',');
+    // Parse SET clause handling quoted values properly
+    const setStr = setMatch[1];
+    let current = '';
+    let inQuote = false;
+    const setParts = [];
+    
+    for (let i = 0; i < setStr.length; i++) {
+      const char = setStr[i];
+      if (char === "'" && (i === 0 || setStr[i-1] !== "'")) {
+        inQuote = !inQuote;
+        current += char;
+      } else if (char === ',' && !inQuote) {
+        setParts.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current) {
+      setParts.push(current.trim());
+    }
+    
     setParts.forEach(part => {
-      const match = part.match(/`?(\w+)`?\s*=\s*'?([^']+)'?/);
+      const match = part.match(/`?(\w+)`?\s*=\s*'(.+)'/);
       if (match) {
-        updateData[match[1]] = match[2].replace(/'/g, '');
+        let value = match[2].replace(/''/g, "'");
+        // Try to parse as number if it looks like one
+        if (/^-?\d+$/.test(value)) {
+          value = parseInt(value);
+        } else if (/^-?\d+\.\d+$/.test(value)) {
+          value = parseFloat(value);
+        }
+        updateData[match[1]] = value;
       }
     });
     
@@ -322,9 +389,21 @@ class LocalStorageDB {
       const conditions = whereMatch[1].trim();
       const parts = conditions.split(/\s+AND\s+/i);
       parts.forEach(part => {
-        const match = part.match(/`?(\w+)`?\s*=\s*'?([^']+)'?/);
+        const match = part.match(/`?(\w+)`?\s*=\s*'(.+)'/);
         if (match) {
-          where[match[1]] = match[2].replace(/'/g, '');
+          let value = match[2].replace(/''/g, "'");
+          // Try to parse as number if it looks like one
+          if (/^-?\d+$/.test(value)) {
+            value = parseInt(value);
+          } else if (/^-?\d+\.\d+$/.test(value)) {
+            value = parseFloat(value);
+          }
+          where[match[1]] = value;
+        } else {
+          const match2 = part.match(/`?(\w+)`?\s*=\s*(\d+)/);
+          if (match2) {
+            where[match2[1]] = parseInt(match2[2]);
+          }
         }
       });
     }
@@ -348,9 +427,21 @@ class LocalStorageDB {
       const conditions = whereMatch[1].trim();
       const parts = conditions.split(/\s+AND\s+/i);
       parts.forEach(part => {
-        const match = part.match(/`?(\w+)`?\s*=\s*'?([^']+)'?/);
+        const match = part.match(/`?(\w+)`?\s*=\s*'(.+)'/);
         if (match) {
-          where[match[1]] = match[2].replace(/'/g, '');
+          let value = match[2].replace(/''/g, "'");
+          // Try to parse as number if it looks like one
+          if (/^-?\d+$/.test(value)) {
+            value = parseInt(value);
+          } else if (/^-?\d+\.\d+$/.test(value)) {
+            value = parseFloat(value);
+          }
+          where[match[1]] = value;
+        } else {
+          const match2 = part.match(/`?(\w+)`?\s*=\s*(\d+)/);
+          if (match2) {
+            where[match2[1]] = parseInt(match2[2]);
+          }
         }
       });
     }

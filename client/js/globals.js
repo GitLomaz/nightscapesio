@@ -121,9 +121,11 @@ let tweenList = [
   "Linear",
 ];
 
-let params = new URLSearchParams(window.location.search);
-let token = params.get("token");
-let char = params.get("id");
+// No longer using URL params for auth/character selection
+// Characters are now auto-created and stored in localStorage
+// let params = new URLSearchParams(window.location.search);
+// let token = params.get("token");
+// let char = params.get("id");
 
 class gameScene extends Phaser.Scene {
   constructor() {

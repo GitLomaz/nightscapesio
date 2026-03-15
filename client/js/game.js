@@ -1,12 +1,6 @@
 function init() {
-  // Configuration
-  // const BASE_URL = window.location.origin;
-  // const DEV_PORT = window.CONFIG?.DEV_PORT || ':2000';
-  
-  console.log('[DEBUG] Document ready, initializing socket connection');
+  console.log('[DEBUG] Document ready, initializing game');
   console.log('[DEBUG] Current URL:', window.location.href);
-  console.log('[DEBUG] Token:', token);
-  console.log('[DEBUG] Character:', char);
   
   // Helper function to add debug events
   function addDebugEvent(msg, color = '#0f0') {
@@ -16,87 +10,70 @@ function init() {
     $('#debugEvents').scrollTop($('#debugEvents')[0].scrollHeight);
   }
   
+  // Get or create persistent character from localStorage
+  function getOrCreateCharacter() {
+    const manager = new CharacterManager();
+    let characterId = localStorage.getItem('nightscape_player_id');
+    
+    // Check if character exists
+    if (characterId) {
+      const char = manager.getCharacter(parseInt(characterId));
+      if (char) {
+        console.log('[DEBUG] Found existing character:', char.name, '(ID:', char.id + ')');
+        addDebugEvent(`Welcome back, ${char.name}!`, '#0ff');
+        return char.id;
+      }
+    }
+    
+    // No character found, create new one with random animal name
+    console.log('[DEBUG] No character found, creating new one...');
+    addDebugEvent('Creating new character...', '#0ff');
+    
+    // Shuffle animals array and pick one
+    const shuffledAnimals = [...animals].sort(() => Math.random() - 0.5);
+    const randomAnimal = shuffledAnimals[0];
+    
+    const newChar = manager.createCharacter({
+      name: randomAnimal,
+      class: 'Knight',
+      map: 'ArchitonOutpost',
+      x: 41,
+      y: 69
+    });
+    
+    // Save character ID to localStorage
+    localStorage.setItem('nightscape_player_id', newChar.id.toString());
+    
+    console.log('[DEBUG] Created new character:', newChar.name, '(ID:', newChar.id + ')');
+    addDebugEvent(`Welcome, ${newChar.name}!`, '#0f0');
+    
+    return newChar.id;
+  }
+  
+  // Get or create character
+  const characterId = getOrCreateCharacter();
+  const manager = new CharacterManager();
+  const character = manager.getCharacter(characterId);
+  
   // Update debug panel
   $('#debugUrlValue').text(window.location.href);
-  $('#debugTokenValue').text(token || 'NOT SET (from URL params)').css('color', token ? '#0f0' : '#ff0');
-  $('#debugCharValue').text(char || 'NOT SET (from URL params)').css('color', char ? '#0f0' : '#ff0');
+  $('#debugTokenValue').text('LocalStorage (No Auth)').css('color', '#0ff');
+  $('#debugCharValue').text(`${character.name} (ID: ${character.id})`).css('color', '#0f0');
   
-  if (!token && !window.location.href.includes("guest") && !window.location.href.includes("localhost") && !window.location.href.includes("singleplayer")) {
-    addDebugEvent('WARNING: No token in URL! Add ?token=xxx&id=xxx to URL', '#ff0');
-  }
-  
-  let mode = 'standard';
+  let mode = 'singleplayer';
   let socketAdapter;
   
-  // Check if we're in singleplayer mode (use LocalSocket)
-  if (window.location.href.includes("singleplayer")) {
-    console.log('[DEBUG] Singleplayer mode detected - using LocalSocket');
-    mode = 'singleplayer';
-    
-    // Use LocalSocket for offline singleplayer
-    socketAdapter = new SocketAdapter({
-      mode: 'local',
-      id: 'singleplayer',
-      token: 'local_token',
-      guest: true
-    });
-    socket = socketAdapter.getSocket();
-    
-    addDebugEvent('Running in SINGLEPLAYER mode (LocalSocket)', '#0ff');
-    
-  } else if (window.location.href.includes("guest")) {
-    console.log('[DEBUG] Guest mode detected - using LocalSocket');
-    mode = 'guest';
-    socketAdapter = new SocketAdapter({
-      mode: 'local',
-      id: 'guest',
-      token: 'guest_token',
-      guest: true
-    });
-    socket = socketAdapter.getSocket();
-  } else if (window.location.href.includes("dev")) {
-    console.log('[DEBUG] Dev mode detected - using LocalSocket');
-    mode = 'dev';
-    socketAdapter = new SocketAdapter({
-      mode: 'local',
-      id: char || 'dev',
-      token: token || 'dev_token',
-      guest: false
-    });
-    socket = socketAdapter.getSocket();
-  } else if (window.location.href.includes("localhost")) {
-    console.log('[DEBUG] Localhost mode detected - using LocalSocket');
-    mode = 'localhost';
-    if (!window.location.href.includes("other")) {
-      console.log('[DEBUG] Using default localhost config');
-      socketAdapter = new SocketAdapter({
-        mode: 'local',
-        id: '5',
-        token: 'localhost_token',
-        localhost: true
-      });
-      socket = socketAdapter.getSocket();
-    } else {
-      console.log('[DEBUG] Using alternate localhost config');
-      mode = 'localhost-other';
-      socketAdapter = new SocketAdapter({
-        mode: 'local',
-        id: '1203',
-        token: 'localhost_token',
-        localhost: true
-      });
-      socket = socketAdapter.getSocket();
-    }
-  } else {
-    console.log('[DEBUG] Standard mode with token and char - using LocalSocket');
-    socketAdapter = new SocketAdapter({
-      mode: 'local',
-      id: char || 'player',
-      token: token || 'default_token',
-      guest: false
-    });
-    socket = socketAdapter.getSocket();
-  }
+  // Always use LocalSocket (no multiplayer)
+  console.log('[DEBUG] Initializing LocalSocket singleplayer mode');
+  socketAdapter = new SocketAdapter({
+    mode: 'local',
+    id: characterId.toString(),
+    token: 'local_token',
+    guest: false
+  });
+  socket = socketAdapter.getSocket();
+  
+  addDebugEvent('Running in SINGLEPLAYER mode', '#0ff');
   
   // Setup server connection handler after io is initialized
   if (typeof setupConnectionHandler === 'function') {
@@ -108,7 +85,7 @@ function init() {
   
   $('#debugModeValue').text(mode);
   console.log('[DEBUG] Socket object created:', socket);
-  addDebugEvent(`Socket initializing in ${mode} mode`);
+  addDebugEvent('Socket initializing...');
 
   // Socket connection events
   socket.on('connect', function() {
@@ -131,13 +108,11 @@ function init() {
     addDebugEvent('Connection error: ' + error.message, '#f00');
   });
   
-  // For LocalSocket mode, manually trigger connection
-  if (mode === 'singleplayer') {
-    setTimeout(() => {
-      socket.emit('connect');
-      console.log('[DEBUG] LocalSocket auto-connected');
-    }, 100);
-  }
+  // Auto-trigger connection for LocalSocket
+  setTimeout(() => {
+    socket.emit('connect');
+    console.log('[DEBUG] LocalSocket auto-connected');
+  }, 100);
   
   socket.on('error', function(error) {
     console.error('[DEBUG] Socket error:', error);
@@ -158,16 +133,10 @@ function init() {
   socket.on("recievePlayer", function (data) {
     console.log('[DEBUG] Received player data:', data);
     addDebugEvent('Received player data', '#0f0');
-    if (window.location.href.includes("dev") && data.tester === 0) {
-      console.log('[DEBUG] Not a tester, redirecting...');
-      addDebugEvent('Not a tester - redirecting', '#ff0');
-      window.location.replace(BASE_URL);
-    } else {
-      console.log('[DEBUG] Player data valid, starting game');
-      addDebugEvent('Starting game...', '#0f0');
-      playerData = data;
-      startGame();
-    }
+    console.log('[DEBUG] Player data valid, starting game');
+    addDebugEvent('Starting game...', '#0f0');
+    playerData = data;
+    startGame();
   });
 
   $(window).blur(function () {
@@ -249,9 +218,7 @@ function init() {
     }
   });
 
-  $("#guestWarning").on("click", function (e) {
-    $("#register").fadeIn(200);
-  });
+  // Guest warning removed - no auth needed!
 
   $(".itemFilterIcon").on("click", function (e) {
     $(".itemFilterIcon").removeClass("selected");
@@ -571,40 +538,7 @@ function init() {
     }
   });
 
-  $("#registerBtn").on("click", function (e) {
-    let valid = true;
-    if ($("#pass").val() !== $("#repass").val()) {
-      showMessage("passwords do not match", "red");
-      valid = false;
-      $("#pass").focus();
-    }
-    if ($("#pass").val().length < 8) {
-      showMessage("password must be at least 8 characters", "red");
-      valid = false;
-      $("#pass").focus();
-    }
-    if ($("#repass").val() === "") {
-      showMessage("field is required", "red");
-      valid = false;
-      $("#repass").focus();
-    }
-    if ($("#pass").val() === "") {
-      showMessage("field is required", "red");
-      valid = false;
-      $("#pass").focus();
-    }
-    if ($("#user").val() === "") {
-      showMessage("field is required", "red");
-      valid = false;
-      $("#user").focus();
-    }
-    if (valid) {
-      socket.emit("register", {
-        username: $("#user").val(),
-        password: $("#pass").val(),
-      });
-    }
-  });
+  // Registration removed - no auth needed!
 
   $("body").on("keyup", function (e) {
     if (e.keyCode === 17) {
@@ -616,13 +550,7 @@ function init() {
   });
 
   $("body").on("keydown", function (e) {
-    if (
-      (!$("#chatText").is(":focus") &&
-        !$("#user").is(":focus") &&
-        !$("#pass").is(":focus") &&
-        !$("#repass").is(":focus")) ||
-      e.keyCode === 27
-    ) {
+    if (!$("#chatText").is(":focus") || e.keyCode === 27) {
       if (e.keyCode === 73) {
         // I
         $("#inventoryButton").trigger("click");
