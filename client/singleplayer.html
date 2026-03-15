@@ -1,0 +1,585 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Nightscapes</title>
+    <script>
+      if (typeof module === "object") {
+        window.module = module;
+        module = undefined;
+      }
+    </script>
+    <script type="text/javascript" src="./js/libs/jquery.js"></script>
+    <link rel="stylesheet" href="./css/main.css" />
+    <!-- Local Socket for Singleplayer -->
+    <script type="text/javascript" src="./js/LocalSocket.js"></script>
+    <script type="text/javascript" src="./js/SocketAdapter.js"></script>
+    <!-- Uncomment for multiplayer: <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script> -->
+    <script src=" https://cdn.jsdelivr.net/npm/pathfinding@0.4.18/visual/lib/pathfinding-browser.min.js "></script>
+    <script src=" https://cdn.jsdelivr.net/npm/object-hash@3.0.0/dist/object_hash.min.js "></script>
+    <script type="text/javascript" src="./data/images.js"></script>
+    <script type="text/javascript" src="./data/cache.js"></script>
+    <script type="text/javascript" src="./data/skills.js"></script>
+    <script type="text/javascript" src="./data/items.js"></script>
+    <script type="text/javascript" src="./data/enemies.js"></script>
+    <script type="text/javascript" src="./data/magicEnemies.js"></script>
+    <script type="text/javascript" src="./data/equipment.js"></script>
+    <script type="text/javascript" src="./data/equipmentClass.js"></script>
+    <script type="text/javascript" src="./data/collectables.js"></script>
+    <script type="text/javascript" src="./data/statusEffects.js"></script>
+    <script type="text/javascript" src="./js/server/classes/maps.js"></script>
+    <script type="text/javascript" src="./js/server/classes/library.js"></script>
+    <script type="text/javascript" src="./js/server/classes/location.js"></script>
+    <script type="text/javascript" src="./js/server/classes/spawnPoint.js"></script>
+    <script type="text/javascript" src="./js/server/classes/receptacle.js"></script>
+    <script type="text/javascript" src="./js/server/classes/collectable.js"></script>
+    <script type="text/javascript" src="./js/server/classes/collectableSpawner.js"></script>
+    <script type="text/javascript" src="./js/server/classes/portal.js"></script>
+    <script type="text/javascript" src="./js/server/classes/NPC.js"></script>
+    <script type="text/javascript" src="./js/server/classes/equipment.js"></script>
+    <script type="text/javascript" src="./js/server/classes/enemy.js"></script>
+    <script type="text/javascript" src="./js/server/main.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+    <script type="text/javascript" src="./js/libs/phaser3.js"></script>
+    <script type="text/javascript" src="./js/libs/lodash.js"></script>
+    <script type="text/javascript" src="./js/soundController.js"></script>
+    <script type="text/javascript" src="./js/globals.js"></script>
+    <script type="text/javascript" src="./js/sockets.js"></script>
+    <script type="text/javascript" src="./js/util.js"></script>
+    <script type="text/javascript" src="./js/ux.js"></script>
+    <script type="text/javascript" src="./js/graphics.js"></script>
+    <script type="text/javascript" src="./js/game.js"></script>
+    <script>
+      if (window.module) module = window.module;
+    </script>
+  </head>
+  <body oncontextmenu="return false;" style="margin: 0">
+    <!-- Debug Panel -->
+    <div id="debugPanel" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 99999; max-width: 400px; border: 2px solid #0f0;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <div style="color: #fff; font-weight: bold;">🔧 DEBUG INFO 🔧</div>
+        <button id="debugToggle" style="background: #333; color: #0f0; border: 1px solid #0f0; cursor: pointer; padding: 2px 8px;">Hide</button>
+      </div>
+      <div id="debugContent">
+        <div id="debugSocketStatus">Socket: Initializing...</div>
+        <div id="debugSocketId">Socket ID: Not connected</div>
+        <div id="debugUrl">URL: <span id="debugUrlValue"></span></div>
+        <div id="debugMode">Mode: <span id="debugModeValue"></span></div>
+        <div id="debugToken">Token: <span id="debugTokenValue"></span></div>
+        <div id="debugChar">Character: <span id="debugCharValue"></span></div>
+        <div id="debugEvents" style="margin-top: 5px; border-top: 1px solid #0f0; padding-top: 5px; max-height: 150px; overflow-y: auto;">
+          <div style="color: #fff; font-size: 10px;">Events:</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Debug panel toggle
+      $(document).ready(function() {
+        $('#debugToggle').on('click', function() {
+          if ($('#debugContent').is(':visible')) {
+            $('#debugContent').hide();
+            $(this).text('Show');
+          } else {
+            $('#debugContent').show();
+            $(this).text('Hide');
+          }
+        });
+      });
+    </script>
+    <span id="b">asd</span>
+    <div id="wrapperContainer">
+      <div id="wrapper" style="display: flex; justify-content: center; height: 100vh"></div>
+    </div>
+    <div id="menuContainer" style="display: none">
+      <div id="mainMenu" class="border" style="display: none">
+        <div class="close border"></div>
+        <div class="btn border" id="optionsBtn">Options</div>
+        <a href='https://www.patreon.com/nightscapes' target="_blank" style='color: #dcdcdc !important;'>
+          <div class="btn border">Patreon</div>
+        </a>
+        <a href='https://discord.gg/k3kn93J7w4' target="_blank" style='color: #dcdcdc !important;'>
+          <div class="btn border">Discord</div>
+        </a>
+        <div class="btn border" id="versionBtn">Version Information</div>
+        <div class="btn border" id="helpBtn">Help</div>
+        <div class="btn border" id="menuBtn">Switch Server</div>
+        <div class="btn border" id="creditsBtn">Credits</div>
+      </div>
+      <div id="respawnPanel" style="display: none">
+        <div style="padding-top: 14px; padding-bottom: 14px">You Have Died</div>
+        <div class="btn border" id="respawnBtn" style="width: 100px;">RESPAWN</div>
+        <div class="btn border" id="menuRespawnBtn" style="width: 100px;">MAIN MENU</div>
+      </div>
+      <div id="itemGainList">
+      </div>
+      <div id="guestWarning" style="display: none">Guest Account, Click Here To Register</div>
+      <div id="register" style="display: none" class="border">
+        <div class="close border"></div>
+        <label for="user">Username</label><br />
+        <input type="text" id="user" name="user" /><br />
+        <label for="pass">Password</label><br />
+        <input type="password" id="pass" name="password" minlength="8" required /><br />
+        <label for="repass">Re-Type Password</label><br />
+        <input type="password" id="repass" name="repassword" minlength="8" required />
+        <div id="regText"></div>
+        <div class="btn border" id="registerBtn" style="width: 100px;">Register</div>
+      </div>
+      <div id="shopPanel" style="display: none" class="border npcPanel">
+        <div id="shopText"></div>
+        <div style="font-size:12px" id='shopCtrlClick'>Ctrl+Click to buy/sell x10</div>
+        <div id="shopItems"></div>
+        <div class='shopRow'></div>
+        <div class='shopRow'></div>
+        <div style="font-size:12px; margin-bottom: 6px">Bulk Equipment Sale</div>
+        <div id='bulkCommon' class='button border' style="margin-top:4px; font-size: 14px;">Common Equipment<br/><span id='bulkCommonGold'>123,456</span> Gold</div>
+        <div id='bulkMagic' class='button border' style="margin-top:4px; font-size: 14px;">Magic Equipment<br/><span id='bulkMagicGold'>123,456</span> Gold</div>
+      </div>
+      <div id="questPanel" style="display: none" class="border npcPanel">
+        <div id="questTitle"></div>
+        <div id="questScript"></div>
+        <div>
+          <div class="hiddenWhenNoAction" style="text-align: center;margin-top:10px">Requirements</div>
+          <div class="hiddenWhenNoAction" id="questReqs" style="padding: 4px;">
+            <div id="questReq-0" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questReq-1" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questReq-2" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questReq-3" class="questItem itemSlot" style="display: none;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="hiddenWhenNoAction" style="text-align: center;">Rewards</div>
+          <div class="hiddenWhenNoAction" id="questRewards" style="padding: 4px;">            
+            <div id="questRew-0" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questRew-1" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questRew-2" class="questItem itemSlot" style="display: none;"></div>
+            <div id="questRew-3" class="questItem itemSlot" style="display: none;"></div>
+          </div>
+        </div>
+        <div id="questBtns">
+          <div id="questBtn1" class="btn border">ACCEPT</div>
+          <div id="questBtn2" class="btn border">IGNORE</div>
+        </div> 
+      </div>
+      <div id='options' class="border" style="display: none">
+        <div class="close border"></div>
+        Music Volume
+        <div>
+          <input type="range" min="0" max="100" value="40" class="volumeSlider" id="musicVol">
+          <div id='chkMusicVol' class='checkbox border checked selected'></div>
+        </div>
+        SFX Volume
+        <div>
+          <input type="range" min="0" max="100" value="40" class="volumeSlider" id="sfxVol">
+          <div id='chkSfxVol' class='checkbox border checked selected'></div>
+        </div>
+        <div class='option'>Protips <div id='chkProtips' class='checkbox border checked selected'></div></div>
+        <div class='option'>Custom Cursor <div id='chkCursor' class='checkbox border checked selected'></div></div>
+        <div class='option'>Single Click Actions <div id='chkActions' class='checkbox border checked'></div></div>
+      </div>
+      <div id='notes' class="border" style="display: none">
+        <div class="close border"></div>
+          <div id='notes-inner'>
+            <h4>0.0.85 (10/08/2021)</h4>
+          <div style="text-align: left;line-height: 18px;margin-left: 8px;">
+            Features: <br/>
+            <ul>
+              <li>New room added to the church, healing pool</li>
+              <li>New affix added for equipment, Flee</li>
+              <li>5 new unique items have been added</li>
+              <li>Chests now have the ability to drop equipment</li>
+              <li>New chest with a starting weapon in it</li>
+              <li>Potion restoration now effected by vit stat</li>
+              <li>Tier 3 and tier 4 equipment added</li>
+              <li>Offhand items added to the game</li>
+              <li>4 new skills added to the game</li>
+              <li>2 new potions added to the game</li>
+              <li>Mana now slowly regenerates</li>
+            </ul>  
+            Cosmetic Changes: <br/>
+            <ul>
+              <li>Damage numbers now cleanly formatted when > 1,000</li>
+              <li>Item bonuses consolidated</li>
+              <li>Protips added to the game</li>
+            </ul>
+            Bug Fixes: <br/>
+            <ul>
+              <li>Enemies can no longer spawn ontop eachother</li>
+              <li>Hit and Dodge affixes have been fixed</li>
+              <li>Hp and Mp after level up now full</li>
+              <li>Chat now scrolls properly when new messages appear</li>
+              <li>Chest animation only visible to chest opener</li>
+              <li>Equipment drop notices now appearing from quests</li>
+              <li>Gold drop values split evenly between players</li>
+              <li>Issue when shop does not close properly resolved</li>
+            </ul>
+            Optomization: <br/>
+            <ul>
+              <li>Graphics no longer build up when window is not active</li>
+            </ul>
+            Balancing: <br/>
+            <ul>
+              <li>All enemies have been re-balanced (again!)</li>
+              <li>Stats altered to be more effective</li>
+              <li>Potions restore values increased</li>
+              <li>Several enemy level changes</li>
+              <li>Logic changed to how magic and rare items are generated</li>
+              <li>Trap spawner changed to all beholders</li>
+              <li>Chance to spawn a magic item increased</li>
+              <li>Quest experence adjusted to reflect quest</li>
+            </ul>
+          </div>
+          <h4>0.0.7 (07/05/2021)</h4>
+          <div style="text-align: left;line-height: 18px;margin-left: 8px;">
+            Features: <br/>
+            <ul>
+              <li>Vendor NPC logic added</li>
+              <li>Stricter username restrictions</li>
+              <li>Bestiary kill bonuses added</li>
+              <li>Single Click Actions option added</li>
+              <li>Default Cursor option added</li>
+              <li>Attack speed now based on weapon and agility</li>
+              <li>Guest login option added to splash screen</li>
+            </ul>  
+            Cosmetic Changes: <br/>
+            <ul>
+              <li>Bestiary displays correctly when > 10 different things killed</li>
+              <li>Bestiary displays hit and dodge odds, not rating</li>
+              <li>Help menu no longer gets cut off</li>
+              <li>Help moved from quickbar to main menu</li>
+              <li>Discord and Patreon links added to main menu</li>
+              <li>Release notes added to main menu</li>
+              <li>Algernon now has an aura to help stand out</li>
+              <li>Health no longer goes under 0 on fatal blow</li>
+              <li>Assorted typo fixes</li>
+              <li>Custom cursor over non-enemy objects</li>
+              <li>Register account flow buttons changed</li>
+              <li>Equipment now also sorted by item slot</li>
+              <li>Chat now scrolls to the bottom when opened</li>
+            </ul>
+            Bug Fixes: <br/>
+            <ul>
+              <li>Chests no longer drop quest items</li>
+              <li>New users now start with full health</li>
+              <li>Dying in the cellar no longer banishes you to the void</li>
+              <li>Death window now disappears correctly on respawn</li>
+              <li>Fixed drops of nameless rare items</li>
+              <li>Fixed issue with multiple people opening a chest at once</li>
+              <li>Fixed issue with selector appearing in top corner of map</li>
+              <li>Inventory now sorts on load</li>
+              <li>Slimeblade and Slimeknife icons showing up again</li>
+              <li>Quest panel now always shows correct rewards and requirements</li>
+            </ul>
+            Optomization: <br/>
+            <ul>
+              <li>Image files sorted</li>
+              <li>Modified how enemies process damage</li>
+            </ul>
+            Balancing: <br/>
+            <ul>
+              <li>All enemies have been re-balanced</li>
+            </ul>
+          </div>
+          <h4>0.0.6 (21-04-2021)</h4>
+          <div class='patchNotes'>
+            Features: <br/>
+            <ul>
+              <li>Bestiary: learn more about enemies by killing large amounts of them</li>
+              <li>A new zone: go check out the church cellar</li>
+              <li>Small map redesign: Church looks a bit different</li>
+              <li>Adjustment to how skulls spawn in the graveyard, should be easier to farm</li>
+            </ul>          
+            Cosmetic Changes: <br/>
+            <ul>
+              <li>New Tileset: the entire map tileset has been given a refresh to look better</li>
+              <li>A few typos have been resolved</li>
+              <li>New effects on changing zones</li>
+            </ul>
+            Optomization: <br/>
+            <ul>
+              <li>Connection pooling added, game should load quicker</li>
+              <li>Map generation logic has been changed for easier drawing and quicker rendering</li>
+            </ul>
+          </div>
+          <h4>0.0.5 (17-03-2021)</h4>
+          <div class='patchNotes'>
+            Features: <br/>
+            <ul>
+              <li>A new unique equipment drop has been added to "Squish Some Slimes II" quest</li>
+              <li>Help panel added (H) explaining hotkeys and stats in detail</li>
+              <li>Chat now holds more messages at a time, and is scrollable</li>
+              <li>Maximum chat message length raised from 55 characters to 140</li>
+              <li>Non-Patreon players no longer have access to dev servers</li>
+              <li>Pagination added to inventory for when you have > 32 items</li>
+            </ul>          
+            Cosmetic Changes: <br/>
+            <ul>
+              <li>Image border colors changed to make it more clear what things are</li>
+              <li>Item sorting adjusted so normal items don't show first</li>
+              <li>ESC key now also closes chat, even when textbox focused</li>
+              <li>Quick buttons highlighted when panel open</li>
+              <li>Button mouseovers added</li>
+            </ul>
+            Bug Fixes: <br/>
+            <ul>
+              <li>Tooltips are once again appearing in the quest panel</li>
+              <li>Fixed issue relating to Slimy Steve's quests</li>
+              <li>Throwing knives would not trigger at max range at right angles</li>
+              <li>Panel dragging now more smooth</li>
+              <li>Fixed item stat duplication bug</li>
+            </ul>
+            Optomization: <br/>
+            <ul>
+              <li>Less stress on network from receptacle objects</li>
+              <li>Changes to how inventory is generated</li>
+            </ul>
+          </div>
+          <h4>0.0.4 (16-02-2021)</h4>
+          <div class='patchNotes'>
+            Features: <br/>
+            <ul>
+              <li>Equipment drops from mobs, with a verity of rarity, and usefulness</li>
+              <li>Gaining levels now grants stat points, that can be spent to increase your power</li>
+              <li>Several new drops added</li>
+              <li>Chat added</li>
+              <li>Hotkeys added to open different panels</li>
+              <li>Main menu navigable with Enter key now</li>
+            </ul>          
+            Bug Fixes: <br/>
+            <ul>
+              <li>Several bugs fixed relating to the inventory panel</li>
+              <li>Bug fixed that caused crashing under some circumstances</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div id='credits' class="border" style="display: none">
+        <div class="close border"></div>
+        <h2>Credits</h2>
+        <h4>This game was created by <a href='https://lomaz.itch.io/' style="color: cornflowerblue;">Ian Lomas</a></h4><br/>
+        Monster and item art created By <a href='https://7soul.itch.io/' style="color: cornflowerblue;">7Soul</a><br/><br/>
+        Music By <a href='https://soundcloud.com/n0way' style="color: cornflowerblue;">NoWay</a><br/><br/>
+        Sound Effects By <a href='https://ricardo-levy.itch.io/' style="color: cornflowerblue;">Ricardo Levy</a><br/>
+      </div>
+      <div id='help' class="border" style="display: none">
+        <div class="close border"></div>
+        <h3>STATS:</h3>
+        <div style="text-align: left;line-height: 18px;margin-left: 8px;">
+          <strong>Attack:</strong> Attack modifier added to weapon damage<br/>
+          <strong>MAttack:</strong> Magic attack modifier added to spells<br/>
+          <strong>Defense:</strong> Flat damage reduction applied to damage taken<br/>
+          <strong>Armor:</strong> damage reduction modifier applied to damage taken<br/>
+          <strong>Hit:</strong> Attack rating (accuracy)<br/>
+          <strong>Flee:</strong> Dodge rating (evasion)<br/>
+          <strong>ASPD:</strong> Attack Speed of physical attacks<br/>
+          <strong>Precision:</strong> Weight applied to top of weapon damage range<br/>
+          <strong>Crit:</strong> Chance to deliver a critical hit <br/>
+          <strong>Modifier:</strong> Damage modifier applied to critical hits
+        </div>
+        <h3>HOTKEYS:</h3>
+        <div style="text-align: left;line-height: 18px;margin-left: 8px;">
+          <strong>I:</strong> Inventory Panel <br/>
+          <strong>B:</strong> Bestiary Panel<br/>
+          <strong>C:</strong> Character Panel<br/>
+          <strong>E:</strong> Equipment Panel<br/>
+          <strong>1 - 4:</strong> Combat Items<br/>
+          <strong>5 - 8:</strong> Combat Skills<br/>
+          <strong>Enter:</strong> Chat<br/>
+          <strong>Esc:</strong> Main Menu
+        </div>
+      </div>
+      <div id='tips' class="border" style="display: none;">
+        <div class="close border"></div>
+        <div id="tip"></div>
+        <div id="tipPages">
+          <div id="tipPagePrev" class='border button'></div>
+          <div id="tipPageNext" class='border button'></div>
+        </div>
+      </div>
+      <div id="bestiary" selectedEnemy=-1 class="border" style="display:none;">
+        <div class="close border"></div>
+        <div id="bestiaryHeader">
+          <div id="bestiaryIcon" class='border'></div>
+          <div id="bestiaryStar" toolTip=''></div>
+          <div id="bestiaryName">??</div>
+        </div>
+        <div id="bestiaryStats">
+          Level: <span id='bLevel'>??</span><br/>
+          Health: <span id='bHealth'>??</span><br/>
+          Attack: <span id='bAttack'>??</span><br/>
+          Defense: <span id='bDef'>??</span><br/>
+          Armor: <span id='bArmor'>??</span><br/>
+          Hit Rate: <span id='bHitRate'>??</span><br/>
+          Dodge Rate: <span id='bDodgeRate'>??</span><br/><br/>
+          Kills: <span id='bKills'>0</span>
+        </div>
+        <div id="bestiaryPages">
+          <div id="bestiaryPagePrev" class='border button'></div>
+          <div id="bestiaryPageNumber" current='0' last='0'>? / 0</div>
+          <div id="bestiaryPageNext" class='border button'></div>
+          <div id="bestiaryPageLock" class='border button'></div>
+        </div>
+      </div>
+      <div id="inventory" class="border" style="display: none">
+        <div class="close border"></div>
+        <div id="itemTypes">
+          <div class="itemFilterIcon button itemGainIconUsable border selected" type='usable'><div id='usableNotice' class='dot' style="display: none;"></div></div>
+          <div class="itemFilterIcon button itemGainIconCombat border" type='combat'><div id='combatNotice' class='dot' style="display: none;"></div></div>
+          <div class="itemFilterIcon button itemGainIconArmor border" type='equip'><div id='equipNotice' class='dot' style="display: none;"></div></div>
+          <div class="itemFilterIcon button itemGainIconQuest border" type='quest'><div id='questNotice' class='dot' style="display: none;"></div></div>
+          <div class="itemFilterIcon button itemGainIconMisc border" type='misc'><div id='miscNotice' class='dot' style="display: none;"></div></div>
+        </div>
+        <div id="inventoryItems"></div>
+        <div id="inventoryPages">
+          <div id="inventoryPagePrev" class='border button'></div>
+          <div id="inventoryPageNumber" current='1' last='2'>1 / 2</div>
+          <div id="inventoryPageNext" class='border button'></div>
+        </div>
+        <div id="inventoryGold">Gold: 123,456</div>
+      </div>
+      <div id="skills" class="border" style="display: none;"> 
+        <div class="close border"></div>
+        <div id="skillList"></div>
+        <div id="skillPoints">Skill Points: 2</div>
+      </div>
+      <div id="stats" class="border" style="display: none;">
+        <div class="close border"></div>
+        <div id="statHeader">Hippopotamus, Level 11 Assassin</div>
+        <div id="statPoints">
+          <div class="statRow statTip" tooltip="Strength: <br/>The main damage stat, increasing also has a small effect on health">
+            <div>Str:</div>
+            <div id="strValue"></div>
+            <div><div id="strPlus" class="plus border"></div></div>
+            <div id="strCost"></div>
+          </div>
+          <div class="statRow statTip" tooltip="Intelligence: <br/>The main magic damage stat, increasing this also raises your maximum mana and reduces damage from spells">
+            <div>Int:</div>
+            <div id="intValue"></div>
+            <div><div id="intPlus" class="plus border"></div></div>
+            <div id="intCost"></div>
+          </div>
+          <div class="statRow statTip" tooltip="Vitality: <br/>The main health stat, increasing this also increases your defense">
+            <div>Vit:</div>
+            <div id="vitValue"></div>
+            <div><div id="vitPlus" class="plus border"></div></div>
+            <div id="vitCost"></div>
+          </div>
+          <div class="statRow statTip"  tooltip="Agility: <br/>The main attack speed stat, increasing this also increases your flee rating">
+            <div>Agi:</div>
+            <div id="agiValue"></div>
+            <div><div id="agiPlus" class="plus border"></div></div>
+            <div id="agiCost"></div>
+          </div>
+          <div class="statRow statTip"  tooltip="Dexterity: <br/>The main accuracy stat, increasing this also increases your attack precision">
+            <div>Dex:</div>
+            <div id="dexValue"></div>
+            <div><div id="dexPlus" class="plus border"></div></div>
+            <div id="dexCost"></div>
+          </div>
+          <div class="statRow">
+            <div>Available Points: <span id=pointValue></span></div>
+          </div>
+        </div>
+        <div id="calcStats">
+          <div class="calcStatRow">
+            <div>Attack: <span id='statAtk'></span></div>
+            <div>HP: <span id='statHealth'></span></div>
+          </div>
+          <div class="calcStatRow">
+            <div>MAttack: <span id='statMatk'></span></div>
+            <div>MP: <span id='statMana'></span></div>
+          </div>
+          <div class="calcStatRow">
+            <div>Defense: <span id='statDef'></span></div>
+            <div>Armor: <span id='statArmor'></span></div>
+          </div>
+          <div class="calcStatRow">
+            <div>Flee: <span id='statFlee'></span></div>
+            <div>ASPD: <span id='statAspd'></span></div>
+          </div>
+          <div class="calcStatRow">
+            <div>Hit: <span id='statHit'></span></div>
+            <div>Precision: <span id='statPer'></span></div>
+          </div>
+          <div class="calcStatRow">
+            <div>Crit: <span id='statCrit'></span>%</div>
+            <div>Modifier: <span id='statMod'></span>%</div>
+          </div>
+        </div>
+      </div>
+      <div id="equipment" class="border" style="display: none">
+        <div class="close border"></div>
+        <div id="helmSlot" class="equipmentSlot" style="border:none">
+          <div class="equipmentName" default='<span style="font-style: italic;">Helm</span>'></div>
+          <div class="equipmentIcon itemSlot fRight"></div>
+        </div>
+        <div id="armorSlot" class="equipmentSlot" style="border:none">
+          <div class="equipmentIcon itemSlot fLeft"></div>
+          <div class="equipmentName"default='<span style="font-style: italic;">Armor</span>'></div>
+        </div>
+        <div id="weaponSlot" class="equipmentSlot">
+          <div class="equipmentName"default='<span style="font-style: italic;">Weapon</span>'></div>
+          <div class="equipmentIcon itemSlot fRight"></div>
+        </div>
+        <div id="offhandSlot" class="equipmentSlot">
+          <div class="equipmentIcon itemSlot fLeft"></div>
+          <div class="equipmentName"default='<span style="font-style: italic;">Offhand</span>'></div>
+        </div>
+        <div id="gloveSlot" class="equipmentSlot">
+          <div class="equipmentName"default='<span style="font-style: italic;">Gloves</span>'></div>
+          <div class="equipmentIcon itemSlot fRight"></div>
+        </div>
+        <div id="bootSlot" class="equipmentSlot">
+          <div class="equipmentIcon itemSlot fLeft"></div>
+          <div class="equipmentName"default='<span style="font-style: italic;">Boots</span>'></div>
+        </div>
+        <div id="accessorySlot1" class="equipmentSlot">
+          <div class="equipmentName"default='<span style="font-style: italic;">Accessory</span>'></div>
+          <div class="equipmentIcon itemSlot fRight"></div>
+        </div>
+        <div id="accessorySlot2" class="equipmentSlot">
+          <div class="equipmentIcon itemSlot fLeft"></div>
+          <div class="equipmentName"default='<span style="font-style: italic;">Accessory</span>'></div>
+        </div>
+      </div>
+      <div id='chat'>
+        <div id='outerChatLog'>
+          <div></div>
+          <div id='chatLog'>
+            <div class="chatMessage systemMessage">System: Welcome to Nightscapes, type /h or /help for chat commands.</div>
+          </div>
+        </div>
+        <div id='chatInput'>
+          <input type="text" id="chatText" maxlength="140">
+          <div id='chatSubmit' class='quickButton border'></div>
+        </div>
+      </div>
+      <div id="statusEffectBar">
+      </div>
+      <div id="quickButtons">
+        <div id='inventoryButton' class='quickButton border'>
+          <div id='inventoryNotice' class='dot' style="display: none;"></div>
+        </div>
+        <div id='equipmentButton' class='quickButton border'></div>
+        <div id='chatButton' class='quickButton border'>
+          <div id='chatNotice' class='dot' style="display: none;"></div>
+        </div>
+        <div id='statsButton' class='quickButton border'>
+          <div id='statNotice' class='dot' style="display: none;"></div>
+        </div>
+        <div id='skillsButton' class='quickButton border'>
+          <div id='skillsNotice' class='dot' style="display: none;"></div>
+        </div>
+        <div id='bestiaryButton' class='quickButton border'></div>
+        <div id='mainMenuButton' class='quickButton border'></div>
+      </div>
+      <div id="combatSelect" class="border" style="display: none">
+      </div>
+      <div id="combatSkillSelect" class="border" style="display: none">
+      </div>
+      <div id="combatItems"></div>
+      <div id="combatSkills"></div>
+      <div id="version">
+        0.0.9
+      </div>
+    </div>
+  </body>
+</html>

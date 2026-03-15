@@ -21,12 +21,30 @@ $(document).ready(function () {
   $('#debugTokenValue').text(token || 'NOT SET (from URL params)').css('color', token ? '#0f0' : '#ff0');
   $('#debugCharValue').text(char || 'NOT SET (from URL params)').css('color', char ? '#0f0' : '#ff0');
   
-  if (!token && !window.location.href.includes("guest") && !window.location.href.includes("localhost")) {
+  if (!token && !window.location.href.includes("guest") && !window.location.href.includes("localhost") && !window.location.href.includes("singleplayer")) {
     addDebugEvent('WARNING: No token in URL! Add ?token=xxx&id=xxx to URL', '#ff0');
   }
   
   let mode = 'standard';
-  if (window.location.href.includes("guest")) {
+  let socketAdapter;
+  
+  // Check if we're in singleplayer mode (use LocalSocket)
+  if (window.location.href.includes("singleplayer")) {
+    console.log('[DEBUG] Singleplayer mode detected - using LocalSocket');
+    mode = 'singleplayer';
+    
+    // Use LocalSocket for offline singleplayer
+    socketAdapter = new SocketAdapter({
+      mode: 'local',
+      id: 'singleplayer',
+      token: 'local_token',
+      guest: false
+    });
+    socket = socketAdapter.getSocket();
+    
+    addDebugEvent('Running in SINGLEPLAYER mode (LocalSocket)', '#0ff');
+    
+  } else if (window.location.href.includes("guest")) {
     console.log('[DEBUG] Guest mode detected');
     mode = 'guest';
     socket = io({ secure: true, query: "guest=1" });
@@ -80,6 +98,14 @@ $(document).ready(function () {
     $('#debugSocketStatus').text('Socket: ⚠️ CONNECTION ERROR').css('color', '#f00');
     addDebugEvent('Connection error: ' + error.message, '#f00');
   });
+  
+  // For LocalSocket mode, manually trigger connection
+  if (mode === 'singleplayer') {
+    setTimeout(() => {
+      socket.emit('connect');
+      console.log('[DEBUG] LocalSocket auto-connected');
+    }, 100);
+  }
   
   socket.on('error', function(error) {
     console.error('[DEBUG] Socket error:', error);
