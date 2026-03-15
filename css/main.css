@@ -1,7 +1,7 @@
 :root {
-  --sword: url("../images/cursor-sword.png"), auto;
-  --cursor: url("../images/cursor-pointer-c.png"), auto;
-  --cursor-active: url("../images/cursor-pointer-b.png"), auto;
+  --sword: url("./images/cursor-sword.png"), auto;
+  --cursor: url("./images/cursor-pointer-c.png"), auto;
+  --cursor-active: url("./images/cursor-pointer-b.png"), auto;
 }
 
 @font-face {
