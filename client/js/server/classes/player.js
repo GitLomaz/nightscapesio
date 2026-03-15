@@ -542,7 +542,7 @@ class Player {
   }
 
   setQueuedAttackItem(itemId) {
-    this.queuedAttack = Items[itemId];
+    this.queuedAttack = items[itemId];
     this.queuedAttack.attackType = "item";
   }
 
