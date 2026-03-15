@@ -1,1 +1,0 @@
-[{"x":20,"y":50,"map":"DampCave"},{"x":20,"y":51,"map":"DampCave"},{"x":21,"y":50,"map":"DampCave"},{"x":21,"y":51,"map":"DampCave"},{"x":22,"y":50,"map":"DampCave"},{"x":22,"y":51,"map":"DampCave"}]

@@ -1,1 +1,0 @@
-[{"x":84,"y":58,"map":"Church"},{"x":84,"y":59,"map":"Church"},{"x":85,"y":58,"map":"Church"},{"x":85,"y":59,"map":"Church"},{"x":86,"y":57,"map":"Church"},{"x":86,"y":58,"map":"Church"},{"x":86,"y":59,"map":"Church"}]
