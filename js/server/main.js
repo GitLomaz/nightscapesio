@@ -1,20 +1,3 @@
-// // IMPORTED RESOURCES
-// require('dotenv').config();
-// const _ = require("lodash");
-// const express = require("express");
-// const path = require("path");
-// const bodyParser = require("body-parser");
-// const cors = require("cors");
-// const app = express();
-// const hash = require("object-hash");
-// const Maps = require("./classes/Maps.js");
-// const Player = require("./classes/Player.js");
-
-// const SpawnPoint = require("./classes/SpawnPoint.js");
-// const Portal = require("./classes/Portal.js");
-// const Receptacle = require("./classes/Receptacle.js");
-// const NPC = require("./classes/NPC.js");
-// const CollectableSpawner = require("./classes/CollectableSpawner.js");
 let portals = [];
 let receptacles = [];
 let NPCList = [];
