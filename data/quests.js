@@ -238,7 +238,7 @@ let quests = [
     name: "Knife Training",
     texts: {
       startText:
-        "How're you with throwing knives? want to be better? throw some knives at that scrap armor over there!",
+        "How're you with throwing knives? want to be better? throw some knives at those domestic snails over there!",
       progressText: "Keep going, you're doing great",
       completeText:
         "Awesome work, here's some more knives to keep practicing with!",

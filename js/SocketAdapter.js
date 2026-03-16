@@ -6,18 +6,19 @@ class SocketAdapter {
     this.mode = config.mode || 'local'; // 'local' or 'multiplayer'
     this.socket = null;
     this.server = null;
+    this.config = config; // Store config for later socket creation
     console.log('[SocketAdapter] Initializing with config:', config);
     console.log('[SocketAdapter] Mode:', this.mode);
     
     if (this.mode === 'local') {
-      this.initializeLocal(config);
+      this.initializeLocalServer();
     } else {
       this.initializeMultiplayer(config);
     }
   }
 
-  initializeLocal(config) {
-    console.log('[SocketAdapter] Starting local initialization...');
+  initializeLocalServer() {
+    console.log('[SocketAdapter] Setting up local server (not creating socket yet)...');
     
     // Use existing global io server or create new one
     if (typeof window !== 'undefined' && window.io && window.io instanceof LocalSocketServer) {
@@ -37,21 +38,32 @@ class SocketAdapter {
       }
     }
     
-    // Create the main player socket
-    const socketQuery = {
-      id: config.id || 'singleplayer',
-      token: config.token || 'local_token',
-      localhost: true,
-      guest: config.guest || false,
-      type: 'game'
-    };
-    console.log('[SocketAdapter] Creating socket with query:', socketQuery);
-    this.socket = this.server.createSocket(socketQuery);
+    console.log('[SocketAdapter] ✅ Local server initialized (socket NOT created yet)');
+  }
+  
+  // Create the socket - call this AFTER setupConnectionHandler is registered
+  createSocket() {
+    if (this.socket) {
+      console.warn('[SocketAdapter] Socket already created!');
+      return this.socket;
+    }
     
-    console.log('[SocketAdapter] ✅ Local mode initialized');
-    console.log('[SocketAdapter] Socket ID:', this.socket.id);
-    console.log('[SocketAdapter] Server available:', !!this.server);
-    console.log('[SocketAdapter] Server has connection listeners:', this.server.listeners['connection']?.length || 0);
+    if (this.mode === 'local') {
+      const socketQuery = {
+        id: this.config.id || 'singleplayer',
+        token: this.config.token || 'local_token',
+        localhost: true,
+        guest: this.config.guest || false,
+        type: 'game'
+      };
+      console.log('[SocketAdapter] Creating socket with query:', socketQuery);
+      this.socket = this.server.createSocket(socketQuery);
+      console.log('[SocketAdapter] ✅ Socket created');
+      console.log('[SocketAdapter] Socket ID:', this.socket.id);
+      console.log('[SocketAdapter] Server has connection listeners:', this.server.listeners['connection']?.length || 0);
+    }
+    
+    return this.socket;
   }
 
   initializeMultiplayer(config) {

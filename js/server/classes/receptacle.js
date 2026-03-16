@@ -49,7 +49,7 @@ class Receptacle {
           that.equipmentDrops.forEach((drop) => {
             let chance = drop.chance;
             if (chance > getRandomInt(0, 100)) {
-              const e = new Equipment(Equipments[drop.item], player.id, "basic");
+              const e = new Equipment(equipment[drop.item], player.id, "basic");
               player.equipment.push(e);
               NOTICES.push({
                 target: player.id,

@@ -1,15 +1,11 @@
-// let NPCs = [];
-// _.each(Maps, function (map) {
-//   try {
-//     mapNPCs = require("../../client/data/maps/" + map.map + "/npcs.js");
-//     NPCs = NPCs.concat(mapNPCs);
-//   } catch (error) {}
-// });
-// let sortedNPCs = [];
-// _.each(NPCs, function (npc) {
-//   sortedNPCs[npc.id] = npc;
-// });
-// NPCs = sortedNPCs;
+// Helper function to get NPCList from OBJECTS.NPCS, indexed by NPC id
+function getNPCList() {
+  let NPCList = [];
+  _.each(OBJECTS.NPCS, function (npc) {
+    NPCList[npc.id] = npc;
+  });
+  return NPCList;
+}
 
 class Quest {
   // status:
@@ -47,6 +43,7 @@ class Quest {
       this.reset();
       return ret;
     }
+    const NPCList = getNPCList(); // Get NPCs from OBJECTS.NPCS
     _.each(currentStep.collect, function (k) {
       if (items[k.id].type === "kill") {
         ret.requirements.push({
@@ -234,7 +231,7 @@ class Quest {
 
   reset() {
     let playerId = this.playerId;
-    const q = _.cloneDeep(Quests[this.id]);
+    const q = _.cloneDeep(quests[this.id]);
     Object.assign(this, q);
     this.playerId = playerId;
     this.step = 0;

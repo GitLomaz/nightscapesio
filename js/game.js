@@ -71,29 +71,79 @@ function init() {
     token: 'local_token',
     guest: false
   });
-  socket = socketAdapter.getSocket();
+  // Don't create socket yet - wait for server to be ready
   
   addDebugEvent('Running in SINGLEPLAYER mode', '#0ff');
   
-  // Setup server connection handler after io is initialized
-  if (typeof setupConnectionHandler === 'function') {
-    console.log('[DEBUG] Calling setupConnectionHandler()...');
-    setupConnectionHandler();
-  } else {
-    console.warn('[DEBUG] setupConnectionHandler not available - server may not be loaded');
+  $('#debugModeValue').text(mode);
+  addDebugEvent('Waiting for server to load...', '#ff0');
+  
+  // Wait for server to fully load before setting up connection handler
+  async function waitForServerAndConnect() {
+    console.log('[DEBUG] Waiting for server to be ready...');
+    console.log('[DEBUG] window.serverReadyPromise exists?', typeof window.serverReadyPromise !== 'undefined');
+    
+    try {
+      if (typeof window.serverReadyPromise !== 'undefined') {
+        await window.serverReadyPromise;
+        console.log('[DEBUG] Server is ready!');
+        addDebugEvent('Server loaded!', '#0f0');
+      } else {
+        console.warn('[DEBUG] serverReadyPromise not available, proceeding anyway');
+        addDebugEvent('Server promise missing', '#ff0');
+      }
+    } catch (error) {
+      console.error('[DEBUG] Error waiting for server:', error);
+      addDebugEvent('Server load error: ' + error.message, '#f00');
+    }
+    
+    // Now setup connection handler after server is ready
+    if (typeof setupConnectionHandler === 'function') {
+      console.log('[DEBUG] Calling setupConnectionHandler()...');
+      setupConnectionHandler();
+      addDebugEvent('Connection handler ready', '#0f0');
+    } else {
+      console.warn('[DEBUG] setupConnectionHandler not available - server may not be loaded');
+      addDebugEvent('setupConnectionHandler missing!', '#f00');
+    }
+    
+    // NOW create the socket after connection handler is registered
+    console.log('[DEBUG] Creating socket...');
+    socket = socketAdapter.createSocket();
+    console.log('[DEBUG] Socket created:', socket);
+    addDebugEvent('Socket created', '#0ff');
+    
+    // Register socket event listeners
+    registerSocketEvents();
+    
+    // Auto-trigger connection for LocalSocket AFTER server is ready
+    setTimeout(() => {
+      socket.emit('connect');
+      console.log('[DEBUG] LocalSocket auto-connected');
+      addDebugEvent('Socket connecting...', '#0ff');
+    }, 100);
   }
   
-  $('#debugModeValue').text(mode);
-  console.log('[DEBUG] Socket object created:', socket);
-  addDebugEvent('Socket initializing...');
-
-  // Socket connection events
-  socket.on('connect', function() {
-    console.log('[DEBUG] Socket connected! Socket ID:', socket.id);
-    $('#debugSocketStatus').text('Socket: ✅ CONNECTED').css('color', '#0f0');
-    $('#debugSocketId').text('Socket ID: ' + socket.id);
-    addDebugEvent('Socket connected! ID: ' + socket.id, '#0f0');
+  // Start the async initialization
+  waitForServerAndConnect().catch(err => {
+    console.error('[DEBUG] Fatal error in waitForServerAndConnect:', err);
+    addDebugEvent('FATAL: ' + err.message, '#f00');
   });
+
+  // Socket connection events - these will be registered after socket is created
+  // We need to wait for socket to exist first
+  function registerSocketEvents() {
+    if (!socket) {
+      console.error('[DEBUG] Cannot register socket events - socket not created yet!');
+      return;
+    }
+    
+    socket.on('connect', function() {
+      console.log('[DEBUG] Socket connected! Socket ID:', socket.id);
+      $('#debugSocketStatus').text('Socket: ✅ CONNECTED').css('color', '#0f0');
+      $('#debugSocketId').text('Socket ID: ' + socket.id);
+      addDebugEvent('Socket connected! ID: ' + socket.id, '#0f0');
+    });
   
   socket.on('disconnect', function(reason) {
     console.log('[DEBUG] Socket disconnected. Reason:', reason);
@@ -108,36 +158,33 @@ function init() {
     addDebugEvent('Connection error: ' + error.message, '#f00');
   });
   
-  // Auto-trigger connection for LocalSocket
-  setTimeout(() => {
-    socket.emit('connect');
-    console.log('[DEBUG] LocalSocket auto-connected');
-  }, 100);
-  
   socket.on('error', function(error) {
     console.error('[DEBUG] Socket error:', error);
     addDebugEvent('Socket error: ' + error, '#f00');
   });
   
-  socket.on('reconnect_attempt', function() {
-    console.log('[DEBUG] Attempting to reconnect...');
-    addDebugEvent('Reconnecting...', '#ff0');
-  });
+    socket.on('reconnect_attempt', function() {
+      console.log('[DEBUG] Attempting to reconnect...');
+      addDebugEvent('Reconnecting...', '#ff0');
+    });
 
-  socket.on("failedToLoad", function (data) {
+    socket.on("failedToLoad", function (data) {
     console.log('[DEBUG] Failed to load event received:', data);
     addDebugEvent('Failed to load player', '#f00');
     window.location.replace(BASE_URL);
   });
 
-  socket.on("recievePlayer", function (data) {
-    console.log('[DEBUG] Received player data:', data);
-    addDebugEvent('Received player data', '#0f0');
-    console.log('[DEBUG] Player data valid, starting game');
-    addDebugEvent('Starting game...', '#0f0');
-    playerData = data;
-    startGame();
-  });
+    socket.on("recievePlayer", function (data) {
+      console.log('[DEBUG] Received player data:', data);
+      addDebugEvent('Received player data', '#0f0');
+      console.log('[DEBUG] Player data valid, starting game');
+      addDebugEvent('Starting game...', '#0f0');
+      playerData = data;
+      startGame();
+    });
+    
+    console.log('[DEBUG] All socket event listeners registered');
+  }
 
   $(window).blur(function () {
     windowFocused = false;

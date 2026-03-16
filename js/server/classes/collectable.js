@@ -43,7 +43,7 @@ class Collectable {
           }
         });
       }
-      if (that.equipmentDrops && that.equipmentDrops.length > 0) {
+      if (that.questDrops && that.questDrops.length > 0) {
         that.questDrops.forEach((drop) => {
           if (player.quests[drop.questId].status === 1) {
             let reqirements =

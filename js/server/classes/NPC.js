@@ -27,8 +27,8 @@ class NPC {
           ret = "?";
         } else {
           if (
-            player.quests[questId].requirements[player.quests[questId].step]
-              .return
+            player.quests[questId].requirements[player.quests[questId].step] && 
+            player.quests[questId].requirements[player.quests[questId].step].return
           ) {
             ret = "!";
           }

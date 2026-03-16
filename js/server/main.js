@@ -471,6 +471,22 @@ var receptaclesPromise = initializeReceptacles();
 var NPCsPromise = initializeNPCs();
 var collectableSpawnersPromise = initializeCollectableSpawners();
 
+// Create a master promise that resolves when all server initialization is complete
+var serverReadyPromise = Promise.all([
+  spawnPointsPromise,
+  portalsPromise,
+  receptaclesPromise,
+  NPCsPromise,
+  collectableSpawnersPromise
+]).then(() => {
+  console.log("========== Nightscape Server Fully Loaded ==========");
+  return true;
+});
+
+// Expose serverReadyPromise globally so game.js can wait for it
+window.serverReadyPromise = serverReadyPromise;
+console.log('[Server] serverReadyPromise exposed on window');
+
 console.log("========== Nightscape Running ==========");
 
 
