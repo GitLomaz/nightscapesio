@@ -69,6 +69,7 @@ class SpawnPoint {
   }
 
   spawnEnemy() {
+    if (!this.enemies) return;
     let totalWeight = this.enemies.reduce((sum, e) => sum + e.weight, 0);
     let se;
     const n = getRandomInt(1, totalWeight);

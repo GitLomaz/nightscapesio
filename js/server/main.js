@@ -11,6 +11,7 @@ let spawnPoints = [];
     "theDepths",
     "westernRidges",
     "architonOutpost",
+    "passageOutpost",
     "dampCave"
   ];
 // let killServer = false;
